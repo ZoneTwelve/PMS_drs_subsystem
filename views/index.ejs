@@ -1,3 +1,4 @@
+<% var message = [ "憑證失效, 請重新登入!", "登入失敗" ] %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,9 +8,10 @@
   <title>Document</title>
 </head>
 <body>
-  <form action="" method="post">
-    <input type="text" name="account" id="">
-    <input type="password" name="password" id="">
+  <p><%= message[e] %></p>
+  <form action="/api/v1/login" method="post">
+    <input type="text" name="ACC" id="">
+    <input type="password" name="PWD" id="">
     <input type="submit">
   </form>
 </body>
