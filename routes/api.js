@@ -13,9 +13,10 @@ router.post("/login", (req, res)=>{
   res.database.query( `SELECT * FROM SMS_member WHERE username="${encodeURIComponent(ACC)}" AND password="${PWD}"`, (err, r, fields) => {
     if( r.length > 0 ){
       req.session.uid = String( r[0]['no'] );
-      req.session.aid = r[0]['authority'];
+      req.session.aid = parseInt( r[0]['authority'] );
       req.session.ssrf = (~~(Math.random() * 0xffffffff + 0x10000000)).toString( 16 );
-      res.redirect("/dorm/");
+      console.log( req.session );
+      res.redirect('/');
     }else{
       req.session.id = null;
       res.redirect("/?e=1")
@@ -23,7 +24,16 @@ router.post("/login", (req, res)=>{
   } );
 });
 
-router.get('/logout/')
+router.get('/logout/:token', (req, res)=>{
+  let { token } = req.params;
+
+  if( token === req.session.token ){
+    req.session.destroy();
+    return res.redirect('/');
+  }else{
+    res.send("Error", 401);
+  }
+})
 
 
 // login required api: ↓
@@ -49,16 +59,22 @@ router.get('/dorm/sheet', (req, res)=>{
 });
 
 router.get('/dorm/sheet/:id', () => {
-
+  res.send( "Send sheet cols" );
 });
 
 // create net sheet
 router.post('/dorm/sheet', (req, res)=>{ 
-  res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, dorm, location, reporter) VALUE ( NULL, NOW(), 'dorm', 'location', 'reporter' )`, (e, d, f) => {
-    if( e )
-      res.send("Error", 500);
-    else
-      res.send("OK", 200);
+  res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, dorm, location, reporter) VALUE ( NULL, NOW(), 'dorm', 'location', 'reporter' );`, (e, _d, _f) => {
+    res.database.query(`SELECT LAST_INSERT_ID();`, (_e, d, _f)=>{
+      if( e ){
+        console.error( e );
+        res.send("Error", 500);
+      }else{
+        let sid = d[0]['LAST_INSERT_ID()'];
+        res.redirect(`/dorm/sheet/${ sid }`);
+      }
+
+    });
   });
 });
 

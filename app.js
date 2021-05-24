@@ -26,8 +26,9 @@ var database_connection = null;
 
 connection.connect(function(err) {
   if (err) {
-    console.error('error connecting: ' + err.stack);
-    return;
+    console.error('Error connecting: ' + err.stack);
+		console.error("Cloud not connect to SQL Server");
+    return process.exit( 1 );
   } 
 	database_connection = connection;
   console.log('connected as id ' + connection.threadId);
@@ -67,7 +68,7 @@ app.use(helmet.hsts({
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(session({
 	secret:random( { length:256 } ), 
-	cookie:{maxAge: 24 * 60 * 60 * 1000},
+	cookie:{maxAge: 30 * 60 * 1000},
 	path:'/tmp'
 }));
 app.use(helmet());
