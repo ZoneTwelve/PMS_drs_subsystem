@@ -1,0 +1,35 @@
+main{
+  margin: 50px auto;
+}
+
+.func_content{
+  width:100%;
+  height:400px; 
+  background: lightgray; 
+  padding:12px 12px 0px 12px;
+  border-radius: 0px 10px 10px 10px;
+  display: none;
+}
+
+.func_content_show{
+  display: inline-block;
+}
+.message{
+  display:none;
+}
+
+.func_label{
+  margin:0px auto;
+  background: white;
+  border: 2px solid lightgrey;
+  border-radius: 10px 10px 0px 0px;
+}
+
+.func_label_show{
+  border:2px solid lightgrey;
+  background: lightgrey;
+}
+
+#boxie{
+  max-width:800px;
+}

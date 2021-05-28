@@ -1,8 +1,7 @@
-var express = require('express');
-const session = require('express-session');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-let rootView = 'dorm';
+const rootView = 'dorm';
 /* Dormitory Repory System → Database name prefix: DRS_*/
 
 // Required login code:
@@ -15,13 +14,13 @@ router.all("*", (req, res, next)=>{
 
 router.get('/', (req, res) => {
   let requirement = { access_id: req.session.aid, ssrf_token: req.session.ssrf };
-  console.log( requirement );
   res.render(`${rootView}/index`, requirement);
 });
 
 router.get('/sheet/:sheet_id', ( req, res ) => {
   let { sheet_id } = req.params;
-  res.render( `${rootView}/fill_sheet`, { sheet_id } );
+  let ssrf_token = req.session.ssrf;
+  res.render( `${rootView}/fill_sheet`, { sheet_id, ssrf_token } );
 });
 
 

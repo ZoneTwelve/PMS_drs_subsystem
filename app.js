@@ -10,16 +10,16 @@ const random = require("./modules/random");
 const jwt = require('jsonwebtoken');
 
 require('dotenv').config(); // loading .env config files
-// database connection start
-var mysql      = require('mysql2');
 
-var connection = mysql.createConnection({
+// database connection start
+const mysql    = require('mysql2');
+const connection = mysql.createConnection({
   host     : process.env.DB_HOST,
 	port		 : process.env.DB_PORT,
   user     : process.env.DB_USER,
   password : process.env.DB_PASS,
+	database : process.env.DB_SCHE,
 	insecureAuth : true,
-	database: process.env.DB_SCHE,
 });
 
 var database_connection = null;
@@ -37,21 +37,20 @@ connection.connect(function(err) {
 
 
 const index = require('./routes/index');
-const v1api  = require("./routes/api");
 const dorm  = require("./routes/dorm");
 const shsd  = require("./routes/shsd");
+const v1api = require("./routes/api");
 
 const app = express();
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.disable('x-powered-by');
-
-app.use( (req, res, next)=>{
+app.use((req, res, next)=>{
 	res.database = database_connection;
 	next();
-} );
+});
+
 
 app.use(helmet.hsts({
   maxAge: 1234000,
@@ -61,14 +60,14 @@ app.use(helmet.hsts({
 }));
 
 
-app.use(helmet.hsts({
-  maxAge: 1234000,
-  force: true
-}))
+// app.use(helmet.hsts({
+//   maxAge: 1234000,
+//   force: true
+// }))
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(session({
 	secret:random( { length:256 } ), 
-	cookie:{maxAge: 30 * 60 * 1000},
+	cookie:{ maxAge: 30 * 60 * 1000 },
 	path:'/tmp'
 }));
 app.use(helmet());
@@ -79,9 +78,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use("/dorm", dorm);
-app.use("/shsd", shsd);
-app.use('/api/v1', v1api);
+app.use("/dorm", dorm); // reporter interface
+app.use("/shsd", shsd); // admin interface
+app.use('/api/v1', v1api); // service api
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

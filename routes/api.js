@@ -1,6 +1,5 @@
-var express = require('express');
-const session = require('express-session');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 /* GET home page. */
 router.get('/', (req, res, next) => {
@@ -15,7 +14,6 @@ router.post("/login", (req, res)=>{
       req.session.uid = String( r[0]['no'] );
       req.session.aid = parseInt( r[0]['authority'] );
       req.session.ssrf = (~~(Math.random() * 0xffffffff + 0x10000000)).toString( 16 );
-      console.log( req.session );
       res.redirect('/');
     }else{
       req.session.id = null;
@@ -24,13 +22,16 @@ router.post("/login", (req, res)=>{
   } );
 });
 
+// router.get('/logout/', (req, res)=>res.send("Token not found", 401));
+
 router.get('/logout/:token', (req, res)=>{
   let { token } = req.params;
-
-  if( token === req.session.token ){
+  if( token === req.session.ssrf ){
     req.session.destroy();
     return res.redirect('/');
   }else{
+    res.setHeader( "Refresh", "3 ; url='/'" );
+    
     res.send("Error", 401);
   }
 })
@@ -40,8 +41,8 @@ router.get('/logout/:token', (req, res)=>{
 
 router.all("*", (req, res, next)=>{
   if( !( req.session.uid ) ){
-    console.log("401 unauthorized");
-    res.redirect("/?e=0");
+    res.setHeader("Refresh", "3 ; url=/?e=0")
+    res.send("<h1>401 unauthorized</h1>", 401);
   }else{
     next();
   }
@@ -49,7 +50,8 @@ router.all("*", (req, res, next)=>{
 
 router.get('/dorm/sheet', (req, res)=>{
   // mysql include format the datetime columns
-  res.database.query( `SELECT * FROM DRS_sheets WHERE 1!=1 UNION SELECT sheet_id, DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s"), dorm, location, reporter FROM DRS_sheets ORDER BY sheet_id desc limit 0, 10;`, (e, data, f) => {
+  let page = parseInt(req.query.page) || 0;
+  res.database.query( `SELECT * FROM DRS_sheets WHERE 1!=1 UNION SELECT sheet_id, DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s"), dorm, location, reporter FROM DRS_sheets ORDER BY sheet_id desc LIMIT ${page}, 10;`, (e, data, f) => {
     if( e ){
       res.send( 'Error', 500 );
     }else{
@@ -58,9 +60,6 @@ router.get('/dorm/sheet', (req, res)=>{
   });
 });
 
-router.get('/dorm/sheet/:id', () => {
-  res.send( "Send sheet cols" );
-});
 
 // create net sheet
 router.post('/dorm/sheet', (req, res)=>{ 
@@ -68,13 +67,47 @@ router.post('/dorm/sheet', (req, res)=>{
     res.database.query(`SELECT LAST_INSERT_ID();`, (_e, d, _f)=>{
       if( e ){
         console.error( e );
-        res.send("Error", 500);
+        res.send({error:"Insert or get last insert id failed"}, 500);
       }else{
         let sid = d[0]['LAST_INSERT_ID()'];
         res.redirect(`/dorm/sheet/${ sid }`);
       }
 
     });
+  });
+});
+
+router.get('/dorm/sheet/:id', (req, res) => {
+  res.send( "Send sheets cols, id="+req.params.id );
+});
+
+router.get('/shsd/drs_group', (req, res)=>{
+  res.database.query(`SELECT * FROM DRS_def_groups`, ( e, d, f )=>{
+    if( e ){
+      return res.send({error:"SQL Error"}, 500);
+    }else{
+      return res.json( d );
+    }
+  });
+});
+
+router.post('/shsd/drs_group', (req, res)=>{
+  res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name) VALUES (NULL, "?");`, [ req.body.name ], (e, r, d)=>{
+    if( e ){
+      return res.send({error:"group insert failed"}, 500);
+    }else{
+      return res.json({message:"OK"});
+    }
+  });
+});
+
+router.put('/shsd/drs_group', (req, res)=>{
+  res.database.query( `UPDATE DRS_def_groups SET name = ? WHERE dgs_id = ?;`, [ req.body.name, req.body.id ], (e, r, d)=>{
+    if( e ){
+      return res.send({error:"Update failed"}, 500);
+    }else{
+      return res.json( r );
+    }
   });
 });
 

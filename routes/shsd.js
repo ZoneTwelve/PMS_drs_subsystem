@@ -1,5 +1,4 @@
 var express = require('express');
-const session = require('express-session');
 var router = express.Router();
 
 // when user didn't login, kick him ass.
@@ -11,8 +10,12 @@ router.all("*", (req, res, next)=>{
 
 
 // Resource: 
-router.get('/', function(req, res, next){
+router.get('/', function(req, res){
   res.render("shsd/index", {});
+});
+
+router.get('/drs_groups', (req, res)=>{
+  res.render("shsd/drs_groups", { ssrf_token: req.session.ssrf });
 });
 
 
