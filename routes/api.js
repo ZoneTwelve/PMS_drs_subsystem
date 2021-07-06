@@ -10,6 +10,10 @@ router.post("/login", (req, res)=>{
   let { ACC, PWD } = req.body;
 
   res.database.query( `SELECT * FROM SMS_member WHERE username="${encodeURIComponent(ACC)}" AND password="${PWD}"`, (err, r, fields) => {
+    if( err ){
+      console.log( err );
+      return res.status( 500 ).send( { error:"" } );
+    }
     if( r.length > 0 ){
       req.session.uid = String( r[0]['no'] );
       req.session.aid = parseInt( r[0]['authority'] );
@@ -92,7 +96,7 @@ router.get('/shsd/drs_group', (req, res)=>{
 });
 
 router.post('/shsd/drs_group', (req, res)=>{
-  res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name) VALUES (NULL, "?");`, [ req.body.name ], (e, r, d)=>{
+  res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name) VALUES (NULL, ?);`, [ req.body.name ], (e, r, d)=>{
     if( e ){
       return res.send({error:"group insert failed"}, 500);
     }else{
@@ -111,6 +115,57 @@ router.put('/shsd/drs_group', (req, res)=>{
   });
 });
 
+router.delete('/shsd/drs_group', (req, res)=>{
+  res.database.query( "DELETE FROM DRS_def_groups WHERE dgs_id = ?;", [ req.body.id ], ( e, r, f ) => {
+    if( e )
+      return res.status( 500 ).send( { error:"Failed" } );
+    return res.send({msg:"OK"});
+  } );
+})
+
+router.get('/shsd/drs_sheet', ( req, res ) => {
+  res.database.query( `SELECT * FROM DRS_def_sheet_cols`, (e, r, d) => {
+    if( e )
+      return res.status( 500 ).send( { e:"Can not find sheet columns correctly" } )
+    return res.send( r );
+  } );
+});
+
+router.post('/shsd/drs_sheet', ( req, res ) => {
+  res.database.query( `INSERT INTO DRS_def_sheet_cols ( dsc_id, group_id, title, state ) VALUE ( NULL, ?, ?, ? )`, 
+                      [parseInt(req.body.gid), req.body.title, req.body.status], (e, r, f) => {
+    if( e ){
+      console.log( e );
+      return res.status( 500 ).send( { e:"Insert failed" } );
+    }else{
+      return res.send( { msg: "Insert successful" } );
+    }
+  } );
+} );
+
+router.put('/shsd/drs_sheet', ( req, res ) => {
+  res.database.query( `UPDATE drs_sql.DRS_def_sheet_cols SET group_id=?, title=?, state=? WHERE dsc_id = ?; `, 
+                      [ parseInt(req.body.gid), req.body.title, req.body.status, req.body.sid ], 
+  ( e, r, f ) => {
+    if( e ){
+      return res.status( 500 ).send( { e:"Update failed!" } );
+    }else{
+      return res.send( { msg:"OK" } );
+    }
+  } );
+});
+
+router.delete('/shsd/drs_sheet', ( req, res ) => {
+  res.database.query( `DELETE FROM DRS_def_sheet_cols WHERE dsc_id = ?`, 
+                        [ req.body.sid ], 
+  ( e, r, f ) => {
+    if( e ){
+      return res.status( 500 ).send( {e: "delete failed"} );
+    }else{
+      return res.send({ msg:"Delete successful!" });
+    }
+  } )
+});
 
 
 module.exports = router;

@@ -10,12 +10,19 @@ router.all("*", (req, res, next)=>{
 
 
 // Resource: 
-router.get('/', function(req, res){
-  res.render("shsd/index", {});
+router.get("/", function(req, res){
+  res.render( "shsd/index", { ssrf_token: req.session.ssrf } );
 });
 
-router.get('/drs_groups', (req, res)=>{
-  res.render("shsd/drs_groups", { ssrf_token: req.session.ssrf });
+
+// management drs groups
+router.get("/drs_groups", (req, res)=>{
+  res.render( "shsd/drs_groups", { ssrf_token: req.session.ssrf } );
+});
+
+// management drs sheets
+router.get("/drs_sheets", ( req, res ) => {
+  res.render( "shsd/drs_sheets", { ssrf_token: req.session.ssrf } );
 });
 
 

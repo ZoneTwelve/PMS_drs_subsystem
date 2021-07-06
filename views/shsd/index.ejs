@@ -5,9 +5,17 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <% include ../template/style %>
+  <link rel="stylesheet" href="/src/css/shsd/home.css">
   <title>Home - SHSD</title>
 </head>
 <body>
-  <a href="/shsd/drs_groups">管理預設檢查項目</a>
+  <% include ../template/navbar %>
+  <main class="container">
+    <h1>預設管理項目</h1>
+    <ul>
+      <li><a href="/shsd/drs_groups">管理預設組別</a></li>
+      <li><a href="/shsd/drs_sheets">管理預設檢查項目</a></li>
+    </ul>
+  </main>
 </body>
 </html>
