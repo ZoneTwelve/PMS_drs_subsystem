@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% include ../template/style %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="/src/js/jquery.min.js"></script> -->
+    <script src="/src/js/qrcode.min.js"></script>
+    <script src="/src/js/shsd/drs_gen_qrcode.js"></script>
+    <link rel="stylesheet" href="/src/css/generate_qrcode.css">
+    <title>Generate QR Code | Admin</title>
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main class="container">
+    <div class="form">
+      <div class="mb-3">
+        <label for="group_id" class="form-label">組別：</label>
+        <select name="group_id" class="form-control" id="group_id" placeholder="請選擇組別">
+          <option disabled default>載入中...</option>
+        </select>
+      </div>
+
+      <div id="qrcode"></div>
+
+      <button type="submit" class="btn btn-primary">生成</button>
+    </div>
+  </main>
+</body>
+</html>

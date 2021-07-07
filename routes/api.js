@@ -81,10 +81,21 @@ router.post('/dorm/sheet', (req, res)=>{
   });
 });
 
+
 router.get('/dorm/sheet/:id', (req, res) => {
   res.send( "Send sheets cols, id="+req.params.id );
 });
 
+//******************************/
+//* management DRS Group's API */
+//******************************/
+// GET - /shsd/drs_group
+// parameter:
+//   - index:  INT
+//     - Start value
+//   - length: INT
+//     - How many item
+// ------------------------------
 router.get('/shsd/drs_group', (req, res)=>{
   res.database.query(`SELECT * FROM DRS_def_groups`, ( e, d, f )=>{
     if( e ){
@@ -95,6 +106,12 @@ router.get('/shsd/drs_group', (req, res)=>{
   });
 });
 
+// POSt - /shsd/drs_group
+// Group is using for add element list into sheets
+// parameter:
+//   - name: String
+//     - group title
+// ------------------------------
 router.post('/shsd/drs_group', (req, res)=>{
   res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name) VALUES (NULL, ?);`, [ req.body.name ], (e, r, d)=>{
     if( e ){
@@ -105,6 +122,13 @@ router.post('/shsd/drs_group', (req, res)=>{
   });
 });
 
+// GET - /shsd/drs_group
+// parameter:
+//   - index:  INT
+//     - Start value
+//   - length: INT
+//     - How many item
+// ------------------------------
 router.put('/shsd/drs_group', (req, res)=>{
   res.database.query( `UPDATE DRS_def_groups SET name = ? WHERE dgs_id = ?;`, [ req.body.name, req.body.id ], (e, r, d)=>{
     if( e ){
