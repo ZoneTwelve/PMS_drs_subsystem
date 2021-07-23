@@ -98,14 +98,14 @@ function openLabel( name ){
 }
 
 function request2api( form, callback ){ 
-  // using for debug request2api( document.querySelector("#form-id") ); // document.form_name
+  // using for debug request2api( document.querySelector("#form-id") );
   let data, opt;
   form = ( form.action === undefined && form._method === undefined ) ? this : form;
 
   data = { 
-          gid: ((form.group_select && form.group_select.value) || undefined), 
-          sid:(form.sheet_select && parseInt(form.sheet_select.value) || undefined),
-          title: ((form.sheet_name && form.sheet_name.value) || undefined ),
+          gid:    ((form.group_select && form.group_select.value) || undefined), 
+          sid:    (form.sheet_select && parseInt(form.sheet_select.value) || undefined),
+          title:  ((form.sheet_name && form.sheet_name.value) || undefined ),
           status: ((form.sheet_def_value && form.sheet_def_value.value) || undefined),
         };
   opt = {

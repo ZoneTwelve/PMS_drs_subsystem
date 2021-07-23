@@ -6,12 +6,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <% include ../template/style %>
   <script src="/src/js/fill_sheet.js"></script>
+  <link rel="stylesheet" href="/src/css/dorm/fill_sheet.css">
   <title>Sheet - Service</title>
 </head>
 <body>
   <% include ../template/navbar %>
   <div class="container">
-    <%= sheet_id %>
+    <div class="row">
+      <div class="row col-md-12 col-lg-3 bg-design func-block">
+        <form action="/api/v1/dorm/sheet" method="POST" class="form" onsubmit="return false;" name="groupSelector">
+          <input type="hidden" name="_method" value="POST">
+          <div class="row">
+            <div class="col-md-10 col-lg-12 pt-3">
+              <select name="sel_group" class="form-select" aria-label="Default select example">
+                <option selected>載入中...</option>
+              </select>
+            </div>
+            <div class="col-md-2 pt-3">
+              <input type="submit" value="新增" class="btn btn-success">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="col-md-12 col-lg-7 row tables bg-design func-block">
+        <form class="row columns" name="checklist">
+          <div class="info-block">
+            <span class="lead">Loading...</span>
+            <input type="text" class="form-control" placeholder="結果">
+            <input type="text" class="form-control" placeholder="備註">
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </body>
 </html>

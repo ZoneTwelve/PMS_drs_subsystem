@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 /* GET home page. */
-router.get('/', (req, res, next) => {
+router.get('/', (req, res) => {
   res.end( res.database==null  ? 'failed' : 'success' );
 });
 
@@ -46,12 +46,23 @@ router.get('/logout/:token', (req, res)=>{
 router.all("*", (req, res, next)=>{
   if( !( req.session.uid ) ){
     res.setHeader("Refresh", "3 ; url=/?e=0")
-    res.send("<h1>401 unauthorized</h1>", 401);
+    res.status(401).send("<h1>401 unauthorized</h1>");
   }else{
     next();
   }
 });
 
+
+
+//******************************/
+//* DRS dorm group RESTful API */
+//******************************/
+// GET - /dorm/sheet
+// parameter:
+//   unknow ( because i'm lazy )
+// ------------------------------
+
+// GET sheet list
 router.get('/dorm/sheet', (req, res)=>{
   // mysql include format the datetime columns
   let page = parseInt(req.query.page) || 0;
@@ -65,8 +76,9 @@ router.get('/dorm/sheet', (req, res)=>{
 });
 
 
-// create net sheet
+// CREATE new sheet
 router.post('/dorm/sheet', (req, res)=>{ 
+  console.log("HERE");
   res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, dorm, location, reporter) VALUE ( NULL, NOW(), 'dorm', 'location', 'reporter' );`, (e, _d, _f) => {
     res.database.query(`SELECT LAST_INSERT_ID();`, (_e, d, _f)=>{
       if( e ){
@@ -81,9 +93,87 @@ router.post('/dorm/sheet', (req, res)=>{
   });
 });
 
-
+// GET sheet content
 router.get('/dorm/sheet/:id', (req, res) => {
-  res.send( "Send sheets cols, id="+req.params.id );
+  // res.send( "Send sheets cols, id="+req.params.id );
+  res.database.query(`SELECT * FROM DRS_sheet_cols WHERE sheet_id = ?;`, 
+    [ req.params.id ], ( e, d, f ) => {
+    if( e ){
+      return res.status( 500 ).json( { e: "GET sheet columns failed" } );
+    }else{
+      return res.json( d );
+    }
+  });
+});
+
+// CREATE sheet content ( from groups subcontent)
+router.post('/dorm/sheet/:id', (req, res) => {
+  // please check currect user & reporter are the same person
+  let sheet_id = parseInt( req.params.id  ) || undefined, // when sheet_id is a string, he will got undefined
+      group_id = parseInt( req.body.group ) || undefined;
+
+  if( group_id == undefined || sheet_id == undefined){
+    return res.status( 400 ).send({ e:"group or sheet id is not found" });
+  }else{
+    res.database.query( `SELECT * FROM DRS_def_sheet_cols WHERE group_id = ?`, [ group_id ], (e, data, f) => {
+      // INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes) VALUES (NULL, 1, 1, 'A', NULL, ''), (NULL, 1, 1, 'B', '123', ''); 
+      let params = [];
+      let sqlc = `INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes) VALUES ${data.map( v=> "(NULL, ?, ?, ?, ?, '')").join(', ')};`;
+      data = data.map( v => [sheet_id, group_id, v.title, v.state,] );
+      for( let d of data ){
+        params = params.concat( d );
+      }
+      console.log( sqlc );
+      res.database.query( sqlc, params, ( err, d, f ) => {
+        if( err ){
+          return res.status( 500 ).send({e:"Insert failed"});
+        }else{
+          return res.send({m:"OK"});
+        }
+      } )
+    } );
+  }
+});
+
+router.put('/dorm/sheet/:id', (req, res) => {
+  /*
+    INSERT INTO TABLE (a,b,c) VALUES 
+    (1,2,3), 
+    (2,5,7), 
+    (3,3,6), 
+    (4,8,2) 
+    ON DUPLICATE KEY UPDATE b=VALUES( b )
+    
+    INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes) VALUES
+    ${req.body['colid[]'].map()}
+    ON DUPLICATE KEY UPDATE 
+    title = VALUES( title ), state = VALUES( state ), notes = VALUES( notes )
+  */
+  let sheet_id = parseInt( req.param.id ) || undefined;
+  let pattern = '( ?, NULL, NULL, NULL, ?, ? )';
+  let sqlc = `INSERT INTO DRS_sheet_cols ( col_id, sheet_id, form_id, title, state, notes ) 
+                                  VALUES ${req.body['colid[]'].map( v => pattern ).join(", ")}
+              ON DUPLICATE KEY UPDATE state = VALUES( state ), notes = VALUES( notes );`
+  console.log( sqlc );
+
+  let data = [];
+  for( let i = 0 ; i < req.body['colid[]'].length ; i++ ){
+    let colid = req.body['colid[]'][ i ],
+        state = req.body['state[]'][ i ],
+        notes = req.body['notes[]'][ i ];
+    data.push( colid );
+    data.push( state );
+    data.push( notes );
+  }
+  console.log( data );
+  console.log( sqlc );
+  res.database.query( sqlc, data, ( e, d, f ) => {
+    if( e ){
+      return res.status( 500 ).send({e:"UPDATE failed"});
+    }else{
+      return res.send( {m:"OK"} );
+    }
+  });
 });
 
 //******************************/
@@ -106,7 +196,7 @@ router.get('/shsd/drs_group', (req, res)=>{
   });
 });
 
-// POSt - /shsd/drs_group
+// POST - /shsd/drs_group
 // Group is using for add element list into sheets
 // parameter:
 //   - name: String

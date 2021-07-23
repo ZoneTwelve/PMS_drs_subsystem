@@ -13,14 +13,15 @@ router.all("*", (req, res, next)=>{
 
 
 router.get('/', (req, res) => {
-  let requirement = { access_id: req.session.aid, ssrf_token: req.session.ssrf };
+  let requirement = { access_id: req.session.aid, ssrf_token: req.session.ssrf, navtitle:"首頁" };
   res.render(`${rootView}/index`, requirement);
 });
 
 router.get('/sheet/:sheet_id', ( req, res ) => {
   let { sheet_id } = req.params;
   let ssrf_token = req.session.ssrf;
-  res.render( `${rootView}/fill_sheet`, { sheet_id, ssrf_token } );
+  let navtitle = "填寫表單";
+  res.render( `${rootView}/fill_sheet`, { sheet_id, ssrf_token, navtitle } );
 });
 
 

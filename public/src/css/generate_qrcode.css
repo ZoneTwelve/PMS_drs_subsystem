@@ -1,5 +1,13 @@
 #qrcode > img{
   max-width: 50%;
-  padding: 20px;
-  background: gray;
+  padding: 20px 20px 0px 20px;
+  background: lightgray;
+  border-radius: 5px 5px 0px 0px;
+}
+
+#content{
+  width:auto;
+  padding:5px;
+  background: lightgray;
+  border-radius: 0px 5px 5px 5px;
 }

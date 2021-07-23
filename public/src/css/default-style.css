@@ -1,3 +1,9 @@
 .navbar{
   padding: 10px;
+  margin-bottom: 20px;
+}
+
+.bg-design{
+  /* background: #f8f9fa; */
+  background: #f7f7f7;
 }

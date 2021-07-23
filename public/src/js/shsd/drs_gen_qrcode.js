@@ -4,11 +4,11 @@ window.onload = function(){
     width : 1024,
     height: 1024
   });
-  qrcode.makeCode(`${location.origin}/SampleHere`);
+  makeQRCode(`${location.origin}/SampleHere`);
 }
 
 
-
-function makeCode(){		
-	
+function makeQRCode( text ){
+  qrcode.makeCode( text );
+  document.querySelector("#content").innerText = text;
 }
