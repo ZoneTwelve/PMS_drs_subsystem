@@ -6,6 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <% include ../template/style %>
   <script src="/src/js/fill_sheet.js"></script>
+  <script type="text/javascript" src="/src/js/instascan.min.js"></script>
+  <script src="/src/js/sweetalert2.min.js"></script>
+  <link rel="stylesheet" href="/src/css/sweetalert2.min.css">
   <link rel="stylesheet" href="/src/css/dorm/fill_sheet.css">
   <title>Sheet - Service</title>
 </head>
@@ -17,19 +20,21 @@
         <form action="/api/v1/dorm/sheet" method="POST" class="form" onsubmit="return false;" name="groupSelector">
           <input type="hidden" name="_method" value="POST">
           <div class="row">
-            <div class="col-md-10 col-lg-12 pt-3">
+            <div class="col-md-9 col-lg-12 pt-3">
               <select name="sel_group" class="form-select" aria-label="Default select example">
                 <option selected>載入中...</option>
               </select>
             </div>
-            <div class="col-md-2 pt-3">
+            <div class="col-lg-12 col-md-3 pt-3">
               <input type="submit" value="新增" class="btn btn-success">
+              <input id="scanner" type="button" value="掃描" class="btn btn-primary">
             </div>
           </div>
         </form>
       </div>
-      <div class="col-md-12 col-lg-7 row tables bg-design func-block">
+      <div class="col-md-12 col-lg-7 row bg-design func-block">
         <form class="row columns" name="checklist">
+          <div class="drag-block"></div>
           <div class="info-block">
             <span class="lead">Loading...</span>
             <input type="text" class="form-control" placeholder="結果">
@@ -39,5 +44,6 @@
       </div>
     </div>
   </div>
+  <video></video>
 </body>
 </html>

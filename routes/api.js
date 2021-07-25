@@ -1,3 +1,4 @@
+const { parse } = require('dotenv');
 const express = require('express');
 const router = express.Router();
 
@@ -11,17 +12,17 @@ router.post("/login", (req, res)=>{
 
   res.database.query( `SELECT * FROM SMS_member WHERE username="${encodeURIComponent(ACC)}" AND password="${PWD}"`, (err, r, fields) => {
     if( err ){
-      console.log( err );
       return res.status( 500 ).send( { error:"" } );
     }
+
     if( r.length > 0 ){
       req.session.uid = String( r[0]['no'] );
       req.session.aid = parseInt( r[0]['authority'] );
       req.session.ssrf = (~~(Math.random() * 0xffffffff + 0x10000000)).toString( 16 );
-      res.redirect('/');
+      return res.redirect('/');
     }else{
       req.session.id = null;
-      res.redirect("/?e=1")
+      return res.redirect("/?e=1")
     }
   } );
 });
@@ -78,7 +79,6 @@ router.get('/dorm/sheet', (req, res)=>{
 
 // CREATE new sheet
 router.post('/dorm/sheet', (req, res)=>{ 
-  console.log("HERE");
   res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, dorm, location, reporter) VALUE ( NULL, NOW(), 'dorm', 'location', 'reporter' );`, (e, _d, _f) => {
     res.database.query(`SELECT LAST_INSERT_ID();`, (_e, d, _f)=>{
       if( e ){
@@ -123,7 +123,7 @@ router.post('/dorm/sheet/:id', (req, res) => {
       for( let d of data ){
         params = params.concat( d );
       }
-      console.log( sqlc );
+
       res.database.query( sqlc, params, ( err, d, f ) => {
         if( err ){
           return res.status( 500 ).send({e:"Insert failed"});
@@ -149,12 +149,12 @@ router.put('/dorm/sheet/:id', (req, res) => {
     ON DUPLICATE KEY UPDATE 
     title = VALUES( title ), state = VALUES( state ), notes = VALUES( notes )
   */
-  let sheet_id = parseInt( req.param.id ) || undefined;
+  let sheet_id = parseInt( req.params.id ) || undefined;
   let pattern = '( ?, NULL, NULL, NULL, ?, ? )';
   let sqlc = `INSERT INTO DRS_sheet_cols ( col_id, sheet_id, form_id, title, state, notes ) 
                                   VALUES ${req.body['colid[]'].map( v => pattern ).join(", ")}
               ON DUPLICATE KEY UPDATE state = VALUES( state ), notes = VALUES( notes );`
-  console.log( sqlc );
+
 
   let data = [];
   for( let i = 0 ; i < req.body['colid[]'].length ; i++ ){
@@ -165,8 +165,7 @@ router.put('/dorm/sheet/:id', (req, res) => {
     data.push( state );
     data.push( notes );
   }
-  console.log( data );
-  console.log( sqlc );
+  
   res.database.query( sqlc, data, ( e, d, f ) => {
     if( e ){
       return res.status( 500 ).send({e:"UPDATE failed"});
@@ -174,6 +173,23 @@ router.put('/dorm/sheet/:id', (req, res) => {
       return res.send( {m:"OK"} );
     }
   });
+});
+
+router.delete('/dorm/sheet/:id', (req, res) => {
+  let sheet_id = parseInt( req.params.id ) || undefined,
+      col_id = parseInt( req.body.col ) || undefined;
+
+  if( sheet_id == undefined || col_id == undefined ){
+    return res.status( 400 ).send( { e:"Can not found sheets id or columns id" } )
+  }else{
+    res.database.query("DELETE FROM DRS_sheet_cols WHERE col_id = ?;", [ col_id ], ( e, d, f ) => {
+      if( e ){
+        return res.status( 500 ).send({e: "DELETE Failed!"});
+      }else{
+        return res.send( { m:"OK" } );
+      }
+    });
+  }
 });
 
 //******************************/
@@ -249,7 +265,6 @@ router.post('/shsd/drs_sheet', ( req, res ) => {
   res.database.query( `INSERT INTO DRS_def_sheet_cols ( dsc_id, group_id, title, state ) VALUE ( NULL, ?, ?, ? )`, 
                       [parseInt(req.body.gid), req.body.title, req.body.status], (e, r, f) => {
     if( e ){
-      console.log( e );
       return res.status( 500 ).send( { e:"Insert failed" } );
     }else{
       return res.send( { msg: "Insert successful" } );

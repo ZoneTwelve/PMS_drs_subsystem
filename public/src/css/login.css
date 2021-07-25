@@ -1,0 +1,10 @@
+body{
+  padding:25px;
+}
+.container{
+  max-width: 450px;
+  margin-top: 100px;
+  padding: 50px;
+  border: 1px solid #afafaf;
+  border-radius: 10px;
+}
