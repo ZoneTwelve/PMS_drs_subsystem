@@ -281,7 +281,7 @@ router.post('/shsd/drs_sheet', ( req, res ) => {
 router.put('/shsd/drs_sheet', ( req, res ) => {
   let datatype = [ 'boolean', 'integer', 'string' ],
       dt = datatype[parseInt( req.body.datatype )];
-  console.log( datatype, dt );
+
   res.database.query( `UPDATE drs_sql.DRS_def_sheet_cols SET group_id=?, title=?, state=?, datatype=? WHERE dsc_id = ?; `, 
                       [ parseInt(req.body.gid), req.body.title, req.body.status, dt, req.body.sid ], 
   ( e, r, f ) => {
