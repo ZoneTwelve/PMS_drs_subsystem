@@ -73,9 +73,6 @@ function updateSelector( form, next ){
         data_dt: (d.datatype || ""),
         data_state: (d.state || ""),
         data_fid: (d.group_id || ""),
-        // data_title: d.title,
-        // data_dt: d.datatype,
-        // data_state: d.state,
       }) );
     }
     // append data into form selector
