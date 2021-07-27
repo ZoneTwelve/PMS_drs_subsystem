@@ -96,7 +96,7 @@ router.post('/dorm/sheet', (req, res)=>{
 // GET sheet content
 router.get('/dorm/sheet/:id', (req, res) => {
   // res.send( "Send sheets cols, id="+req.params.id );
-  res.database.query(`SELECT * FROM DRS_sheet_cols WHERE sheet_id = ?;`, 
+  res.database.query(`SELECT * FROM DRS_sheet_cols WHERE sheet_id = ? ORDER BY order_id ASC;`, 
     [ req.params.id ], ( e, d, f ) => {
     if( e ){
       return res.status( 500 ).json( { e: "GET sheet columns failed" } );
@@ -150,20 +150,24 @@ router.put('/dorm/sheet/:id', (req, res) => {
     title = VALUES( title ), state = VALUES( state ), notes = VALUES( notes )
   */
   let sheet_id = parseInt( req.params.id ) || undefined;
-  let pattern = '( ?, NULL, NULL, NULL, ?, ? )';
-  let sqlc = `INSERT INTO DRS_sheet_cols ( col_id, sheet_id, form_id, title, state, notes ) 
+  let pattern = '( ?, NULL, NULL, NULL, ?, ?, ? )';
+  let sqlc = `INSERT INTO DRS_sheet_cols ( col_id, sheet_id, form_id, title, state, notes, order_id ) 
                                   VALUES ${req.body['colid[]'].map( v => pattern ).join(", ")}
-              ON DUPLICATE KEY UPDATE state = VALUES( state ), notes = VALUES( notes );`
+              ON DUPLICATE KEY UPDATE 
+                state = VALUES( state ), notes = VALUES( notes ), order_id = VALUES(order_id);`
 
 
   let data = [];
+
   for( let i = 0 ; i < req.body['colid[]'].length ; i++ ){
     let colid = req.body['colid[]'][ i ],
         state = req.body['state[]'][ i ],
-        notes = req.body['notes[]'][ i ];
+        notes = req.body['notes[]'][ i ],
+        newid = req.body['newid[]'][ i ];
     data.push( colid );
     data.push( state );
     data.push( notes );
+    data.push( newid );
   }
   
   res.database.query( sqlc, data, ( e, d, f ) => {
@@ -219,7 +223,7 @@ router.get('/shsd/drs_group', (req, res)=>{
 //     - group title
 // ------------------------------
 router.post('/shsd/drs_group', (req, res)=>{
-  res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name) VALUES (NULL, ?);`, [ req.body.name ], (e, r, d)=>{
+  res.database.query( `INSERT INTO DRS_def_groups (dgs_id, name, visible) VALUES (NULL, ?, ?);`, [ req.body.name, req.body.visible==1?1:0 ], (e, r, d)=>{
     if( e ){
       return res.send({error:"group insert failed"}, 500);
     }else{
@@ -236,7 +240,7 @@ router.post('/shsd/drs_group', (req, res)=>{
 //     - How many item
 // ------------------------------
 router.put('/shsd/drs_group', (req, res)=>{
-  res.database.query( `UPDATE DRS_def_groups SET name = ? WHERE dgs_id = ?;`, [ req.body.name, req.body.id ], (e, r, d)=>{
+  res.database.query( `UPDATE DRS_def_groups SET name = ?, visible = ? WHERE dgs_id = ?;`, [ req.body.name, req.body.visible==1?1:0, req.body.id ], (e, r, d)=>{
     if( e ){
       return res.send({error:"Update failed"}, 500);
     }else{
@@ -262,8 +266,10 @@ router.get('/shsd/drs_sheet', ( req, res ) => {
 });
 
 router.post('/shsd/drs_sheet', ( req, res ) => {
-  res.database.query( `INSERT INTO DRS_def_sheet_cols ( dsc_id, group_id, title, state ) VALUE ( NULL, ?, ?, ? )`, 
-                      [parseInt(req.body.gid), req.body.title, req.body.status], (e, r, f) => {
+  let datatype = [ 'boolean', 'integer', 'string' ],
+      dt = datatype[parseInt( req.body.datatype )];
+  res.database.query( `INSERT INTO DRS_def_sheet_cols ( dsc_id, group_id, title, state, datatype ) VALUE ( NULL, ?, ?, ?, ? )`, 
+                      [parseInt(req.body.gid), req.body.title, req.body.status, dt], (e, r, f) => {
     if( e ){
       return res.status( 500 ).send( { e:"Insert failed" } );
     }else{
@@ -273,8 +279,11 @@ router.post('/shsd/drs_sheet', ( req, res ) => {
 } );
 
 router.put('/shsd/drs_sheet', ( req, res ) => {
-  res.database.query( `UPDATE drs_sql.DRS_def_sheet_cols SET group_id=?, title=?, state=? WHERE dsc_id = ?; `, 
-                      [ parseInt(req.body.gid), req.body.title, req.body.status, req.body.sid ], 
+  let datatype = [ 'boolean', 'integer', 'string' ],
+      dt = datatype[parseInt( req.body.datatype )];
+  console.log( datatype, dt );
+  res.database.query( `UPDATE drs_sql.DRS_def_sheet_cols SET group_id=?, title=?, state=?, datatype=? WHERE dsc_id = ?; `, 
+                      [ parseInt(req.body.gid), req.body.title, req.body.status, dt, req.body.sid ], 
   ( e, r, f ) => {
     if( e ){
       return res.status( 500 ).send( { e:"Update failed!" } );

@@ -6,7 +6,19 @@ window.onload = function(){
 }
 
 const loadingEvenet = {
-  modify: updateSelector,
+  modify: ( form, next ) => {
+    updateSelector( form, () => {
+      form.group_name.value = "";
+      form.visible.checked = false;
+      form.group_select.onchange = () => {
+        let el = form.group_select.options[form.group_select.selectedIndex];
+        console.log( el.data_name );
+        form.group_name.value = el.data_name;
+        form.visible.checked = el.visible;
+      }
+      next();
+    } )
+  },
   delete: updateSelector, // (form, next)
 }
 
@@ -14,12 +26,14 @@ function updateSelector( form, next ){
   loadGroupInfo( ( data )=>{
     let selector = form.group_select;
     selector.innerHTML = "";
-    selector.appendChild( createElement("option", {innerText:"請選擇要操作的項目"}) );
+    selector.appendChild( createElement("option", {innerText:"請選擇要操作的項目", hidden:true}) );
     for( let d of data ){
       console.log( d );
       selector.appendChild( createElement("option", {
         value:     d.dgs_id,
-        innerText: `${d.dgs_id} - ${d.name}`
+        innerText: `${d.dgs_id} - ${d.name}`,
+        data_name: d.name,
+        visible: d.visible
       }) );
     }
     // append data into form selector
@@ -71,7 +85,8 @@ function request2api( form, callback ){
 
   data = { 
           name: ((form.group_name && form.group_name.value) || undefined), 
-          id:(form.group_select && parseInt(form.group_select.value) || undefined) 
+          id:(form.group_select && parseInt(form.group_select.value) || undefined), 
+          visible: form._method!='DELETE' ? (form.visible && form.visible.checked) : undefined
         };
   opt = {
     method:form._method.value,
@@ -80,6 +95,11 @@ function request2api( form, callback ){
     },
     body: JSON.stringify( data ),
   };
+  
+  if( form._method.value!="POST" && data.id == undefined ){
+    alert("缺少選擇項目")
+    return false;
+  }
   fetch( form.action, opt ).then( res => {
     res.json().then( data => {
       if( data.error ){

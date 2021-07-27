@@ -7,7 +7,9 @@
   <% include ../template/style %>
   <link rel="stylesheet" href="/src/css/shsd/drs_manage.css">
   <link rel="stylesheet" href="/src/css/shsd/drs_groups.css">
+  <link rel="stylesheet" href="/src/css/sweetalert2.min.css">
   <script src="/src/js/shsd/drs_groups.js"></script>
+  <script src="/src/js/sweetalert2.min.js"></script>
   <title>組別管理 | Admin</title>
 </head>
 <body>
@@ -27,6 +29,10 @@
             <input name="group_name" type="text" class="form-control" id="new-group-name" placeholder="組別名稱">
             <small class="form-text text-muted">新增一個組別檢查項目的主項目</small>
           </div>
+          <div class="form-group">
+            <label for="visible">可見：</label>
+            <input type="checkbox" name="visible" id="visible">
+          </div>
           <input type="submit" class="btn btn-success" value="新增">
         </form>
       </div>
@@ -42,6 +48,10 @@
             </select>
             <input name="group_name" type="text" class="form-control" id="new-group-name" placeholder="新的組別名稱">
             <small class="form-text text-muted">修改組別項目的名稱</small>
+          </div>
+          <div class="form-group">
+            <label for="visible">可見：</label>
+            <input type="checkbox" name="visible" id="visible">
           </div>
           <input type="submit" class="btn btn-primary" value="修改">
         </form>

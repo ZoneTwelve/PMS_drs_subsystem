@@ -51,12 +51,18 @@
   height:auto;
 }
 
-.drag-block{
+.drag-block .columns .sheet-submit-control{
   padding-right: 0px;
 }
 
-.columns{
-  padding-right: 0px;
+
+
+.unsaved{
+  /* outline:none; */
+  outline: 2px dotted #e73;
+}
+.unsaved:focus{
+  outline: 4px solid #e73;
 }
 
 .drag-items {

@@ -25,7 +25,7 @@ function scannerView( ){
 
   let scanner = new Instascan.Scanner({ video });
   scanner.addListener('scan', function (content) {
-    console.log(content);
+    // console.log(content);
   });
   Instascan.Camera.getCameras().then(function (cameras) {
     if (cameras.length > 0) {
@@ -58,20 +58,17 @@ function applySheetColumns( data ){
   for( let i = 0 ; i < data.length ; i++ ){
     let d = data[ i ];
     let chunk = createElement("div", { className: "info-block drag-items", title:"拖動可調換順序" });
-
     chunk.draggable = true;
-    // chunk.addEventListener("dragstart", dragStart);
-    // chunk.addEventListener("drop", dropped);
-    // chunk.addEventListener("dragenter", cancelDefault);
-    // chunk.addEventListener("dragover", cancelDefault);
+    
     // "G"+d.form_id+" - "+d.title  → Original method
     // `G${d.form_id} - ${d.title}` → Javascript ES6
     // "G$d.form_id - $d.title" → PHP 
-    console.log( d );
+    // console.log( d );
     let head = createElement("div", {className:"row item-head"});
     let idlen = -(data.length > 9 ? 2 : 1);
-    let oid   = ("0"+(i+1)).substr( idlen ); // order id
-    console.log( idlen );
+    let order_id = ( i + 1 ); //d.order_id == 0 ? (i+1) : d.order_id;
+    let oid   = ("0"+(order_id)).substr( idlen ); // order id
+    // console.log( idlen );
     head.appendChild( 
       createElement("span",  { innerText:`(${oid}) G${d.form_id} - ${d.title}`, className:"title lead px-2 col-11" })
       // createElement("div", {className:"col-8"}).appendChild(
@@ -85,34 +82,40 @@ function applySheetColumns( data ){
 
     chunk.appendChild( head );
     chunk.appendChild(createElement("input", { type:"hidden", name:"colid[]", value:d.col_id, className:"db" }))
-    chunk.appendChild(createElement("input", { type:"hidden", name:"newid[]", value:d.col_id, className:"db" }))
-    chunk.appendChild(createElement("input", { placeholder: "狀態", name:"state[]", className:"db form-control pt-a", value: (d.state || "") }));
-    chunk.appendChild(createElement("input", { placeholder: "備註", name:"notes[]", className:"db form-control pt-a", value: (d.notes || "") }));
+    chunk.appendChild(createElement("input", { type:"hidden", name:"newid[]", value:order_id, className:"db" }))
+    chunk.appendChild(createElement("input", { placeholder: "狀態", name:"state[]", className:"db form-control pt-a", value: (d.state || ""), oninput: formGlobalCheck }));
+    chunk.appendChild(createElement("input", { placeholder: "備註", name:"notes[]", className:"db form-control pt-a", value: (d.notes || ""), oninput: formGlobalCheck }));
     block.appendChild( chunk );
   }
   form.appendChild( block );
 
-  form.appendChild( data.length == 0 ? 
-                    createElement("h1", {innerText:"No Data"}) :
-                    createElement("button", {className:"btn btn-success pt-a", innerText:"送出"}) 
-                  );
+  let controlBtn = createElement("div", {className:"sheet-submit-control"})
+  controlBtn.appendChild(
+    data.length == 0
+      ? createElement("h1", {innerText:"No Data"})
+      : createElement("button", {className:"btn btn-success pt-a sheet-submit-btn form-control", innerText:"送出"}) 
+  )
+  form.appendChild( controlBtn );
 
-  form.onsubmit = ( ) => {
+  form.onsubmit = ( callback ) => {
     let uri = `/api/v1${location.pathname}`;
     let dataElement = document.querySelectorAll('.db');
     let data = new Object(); // { 'colid[]': [], 'state[]': [], 'notes[]': [] };
-    for( let i = 0 ; i < dataElement.length ; i += 3 ){
+    for( let i = 0 ; i < dataElement.length ; i += 4 ){
       let column = dataElement[ i ],
           status = dataElement[i+1],
-          note   = dataElement[i+2];
+          note   = dataElement[i+2],
+          newid  = dataElement[i+3];
       
       data[ column.name ] = data[ column.name ] || [];
+      data[ newid.name  ] = data[ newid.name  ] || [];
       data[ status.name ] = data[ status.name ] || [];
       data[  note.name  ] = data[  note.name  ] || [];
 
-      data[ column.name ].push(column.value);
-      data[ status.name ].push(status.value);
-      data[  note.name  ].push( note.value );
+      data[ column.name ].push( column.value );
+      data[ newid.name  ].push( newid.value  );
+      data[ status.name ].push( status.value );
+      data[  note.name  ].push( note.value   );
     }
     form.innerHTML = "<h1>Loading...</h1>"
     request(uri, {
@@ -120,6 +123,7 @@ function applySheetColumns( data ){
       method: "PUT",
       body: JSON.stringify( data )
     }).then( (res) => {
+      unsaved = false;
       updateSheetForm();
     } )
 
@@ -128,6 +132,12 @@ function applySheetColumns( data ){
 
   if( !mobileDetect( ) )
     dragItems();
+}
+
+function formGlobalCheck( ){
+  unsaved = true;
+  this.classList.add( "unsaved" );
+  console.log( this );
 }
 
 function dragItems( ){
@@ -141,6 +151,7 @@ function dragItems( ){
   
     draggable.addEventListener('dragend', () => {
       draggable.classList.remove('dragging')
+      updateNewColumnsID();
     });
   });
   
@@ -176,18 +187,33 @@ function getDragAfterElement( container, y ){
   }, { offset: Number.NEGATIVE_INFINITY }).element
 }
 
+function updateNewColumnsID( ){
+  let uid_list = [];
+  let nid = document.querySelectorAll('[name="newid[]"]');
+  for(let el of nid){
+    uid_list.push( parseInt( el.value ) );
+    // console.log( el.value );
+  }
+  let list = uid_list.slice().sort((a,b)=>a>b);
+  for( let i = 0 ; i < nid.length ; i++ ){
+    nid[ i ].value = list[ i ];
+  }
+  // let list = uid_list.sort((a,b)=>a>b);
+  // console.log( list, uid_list );
+}
+
 
 function closest( el, target, params ){
   params = params || { };
   while( el != null ){
-    console.log( el );
+    // console.log( el );
     if(  el.tagName.toLowerCase() == target.toLowerCase() ){
       let keys = Object.keys( params );
       let same = true && keys.length > 0;
       for(let key of keys){
         if( el[ key ].indexOf( params[ key ] ) == -1 ){
           same = false;
-          console.log( key );
+          // console.log( key );
         }
       }
       if( same )
@@ -199,41 +225,66 @@ function closest( el, target, params ){
 }
 
 function removeThisItem( el = undefined ){
-  el = el || this;
   let uri = `/api/v1${location.pathname}`;
   let block = closest( this, "div", {className:"info-block"} );
-  
-  if( block != null ){
-    let title = block.querySelector('span.title').innerText;
-    let colid = block.querySelector('[name="colid[]"]').value;
-    console.log( "remove this item", colid );
-    Swal.fire({
-      title,
-      icon: 'warning',
-      html: `確定要刪除此項目嗎`,
-      showCloseButton: true,
-      showCancelButton: true,
-      focusConfirm: false,
-      confirmButtonText: '刪除',
-      confirmButtonAriaLabel: '刪除！',
-      cancelButtonText: '取消'
-    }).then( res => {
-      if( res.isConfirmed ){
-        request(uri, {
-          headers: { 'Content-Type': 'application/json' },
-          method:"DELETE",
-          body: JSON.stringify( { col: colid } )
-        }).then( ( res ) => {
-          if( res.e != undefined ){
-            return alert("Failed!");
-          }else{
-            return updateSheetForm();
-          }
-        });
-      }
-    });
 
+  let dataElement = document.querySelectorAll('.db');
+  let data = new Object(); // { 'colid[]': [], 'state[]': [], 'notes[]': [] };
+  for( let i = 0 ; i < dataElement.length ; i += 4 ){
+    let column = dataElement[ i ],
+        status = dataElement[i+1],
+        note   = dataElement[i+2],
+        newid  = dataElement[i+3];
+    
+    data[ column.name ] = data[ column.name ] || [];
+    data[ newid.name  ] = data[ newid.name  ] || [];
+    data[ status.name ] = data[ status.name ] || [];
+    data[  note.name  ] = data[  note.name  ] || [];
+
+    data[ column.name ].push( column.value );
+    data[ newid.name  ].push( newid.value  );
+    data[ status.name ].push( status.value );
+    data[  note.name  ].push( note.value   );
   }
+  // form.innerHTML = "<h1>Loading...</h1>"
+  request(uri, {
+    headers: { 'Content-Type': 'application/json' },
+    method: "PUT",
+    body: JSON.stringify( data )
+  }).then( (res) => {
+    if( block != null ){
+      let title = block.querySelector('span.title').innerText;
+      let colid = block.querySelector('[name="colid[]"]').value;
+      console.log( "remove this item", colid );
+      Swal.fire({
+        title,
+        icon: 'warning',
+        html: `確定要刪除此項目嗎`,
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: '刪除',
+        confirmButtonAriaLabel: '刪除！',
+        cancelButtonText: '取消'
+      }).then( res => {
+        if( res.isConfirmed ){
+          request(uri, {
+            headers: { 'Content-Type': 'application/json' },
+            method:"DELETE",
+            body: JSON.stringify( { col: colid } )
+          }).then( ( res ) => {
+            if( res.e != undefined ){
+              return alert("Failed!");
+            }else{
+              unsaved = false;
+              return updateSheetForm();
+            }
+          });
+        }
+      });
+  
+    }
+  } )
 
 }
 
@@ -249,8 +300,9 @@ function applyGroupSelector( json ){
   for( let obj of json ){
     console.log( obj );
     form.sel_group.appendChild( createElement("option", {
-      innerText: `${obj.dgs_id} - ${obj.name}`,
+      innerText: `${obj.dgs_id} - ${obj.name} ${obj.visible==0 ? "(QR Code)" : ""}`,
       value: obj.dgs_id,
+      disabled: obj.visible==0,
     }));
   }
 
@@ -258,19 +310,23 @@ function applyGroupSelector( json ){
     let body = JSON.stringify({ group: this.sel_group.value });
     let uri = `/api/v1${location.pathname}`;
 
-    request(uri, {
-      headers:{
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: this._method.value, 
-      body
-    }).then( ( res ) => {
-      if( res.e )
-        alert( res.e );
-      updateSheetForm();
-      // alert( JSON.stringify(res) );
-    } );
+    if( unsaved == true && !confirm("您尚未存檔, 確定要新增項目？") ){
+      // alert("資料已新增");
+    }else{
+      request(uri, {
+        headers:{
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: this._method.value, 
+        body
+      }).then( ( res ) => {
+        if( res.e )
+          alert( res.e );
+        updateSheetForm();
+        // alert( JSON.stringify(res) );
+      } );
+    }
     return false;
   }
 }
@@ -283,7 +339,7 @@ function request( url, opt ){
 function get( opt, callback ){
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = ( ) => {
-    console.log( xhr.readyState, xhr.status );
+    // console.log( xhr.readyState, xhr.status );
     if( xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 304)){
       callback( JSON.parse(xhr.responseText) );
     }
