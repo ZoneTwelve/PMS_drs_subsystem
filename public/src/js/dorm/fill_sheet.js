@@ -148,7 +148,9 @@ function applySheetColumns( data ){
     chunk.appendChild( head );
     chunk.appendChild(createElement("input", { type:"hidden", name:"colid[]", value:d.col_id, className:"db" }))
     chunk.appendChild(createElement("input", { type:"hidden", name:"newid[]", value:order_id, className:"db" }))
+    console.log( d );
     chunk.appendChild(createElement("input", { placeholder: "狀態", name:"state[]", className:"db form-control pt-a", value: (d.state || ""), oninput: formGlobalCheck }));
+
     chunk.appendChild(createElement("input", { placeholder: "備註", name:"notes[]", className:"db form-control pt-a", value: (d.notes || ""), oninput: formGlobalCheck }));
     block.appendChild( chunk );
   }
@@ -259,7 +261,8 @@ function updateNewColumnsID( ){
     uid_list.push( parseInt( el.value ) );
     // console.log( el.value );
   }
-  let list = uid_list.slice().sort((a,b)=>a>b);
+  let list = uid_list.slice().sort();
+  console.log( uid_list, list );
   for( let i = 0 ; i < nid.length ; i++ ){
     nid[ i ].value = list[ i ];
   }
