@@ -11,6 +11,7 @@ window.onload = function( ){
     document.submit_form.onsubmit = tag_request;
     res.json().then( applyDataSelector )
   } );
+
   scan_nfc_tag( [{
     name:'#nfc-tag-value',
     value:'value',
@@ -20,6 +21,7 @@ window.onload = function( ){
     value:'innerText',
     func: search_nfc_tag
   }] );
+  
   document.querySelector("#scan_nfc").onclick = ( ) => {
     if (!("NDEFReader" in window)){
       alert( "裝置不支援 NFC" )
@@ -94,7 +96,6 @@ function search_nfc_tag( uid ){
       }
     } );
   });
-  // alert("search");
 }
 
 function tag_request( ){

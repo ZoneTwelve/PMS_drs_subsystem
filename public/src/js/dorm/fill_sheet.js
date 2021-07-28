@@ -1,4 +1,5 @@
 var unsaved = false;
+var group_data = null;
 window.onload = function(){
   get( { url: "/api/v1/shsd/drs_group" }, applyGroupSelector );
   updateSheetForm();
@@ -16,25 +17,89 @@ window.addEventListener("beforeunload", function (e) {
   return confirmationMessage; //Gecko + Webkit, Safari, Chrome etc.
 });
 
-function scannerView( ){
-  // let container = createElement("div", { className: "container camera-view" });
-  let video     = document.querySelector("video");
-  //createElement("video", { className: "camera-preview" });
-  // container.appendChild( video );
-  // document.body.appendChild( container );
 
-  let scanner = new Instascan.Scanner({ video });
-  scanner.addListener('scan', function (content) {
-    // console.log(content);
-  });
-  Instascan.Camera.getCameras().then(function (cameras) {
-    if (cameras.length > 0) {
-      scanner.start(cameras[0]);
-    } else {
-      console.error('No cameras found.');
+async function scan_nfc_tag( target ){
+  if ("NDEFReader" in window) {
+    const ndef = new NDEFReader();
+    try {
+      await ndef.scan();
+      ndef.onreading = (event) => {
+        let t = target;
+        let serialNumber = event.serialNumber.replace(/:/g, '').toUpperCase();
+        // document.querySelector( t['name'] )[t['value']] = serialNumber;
+        if( t['func'] != undefined )
+          t['func']( serialNumber );
+      }
+    } catch(error) {
+      alert( error );
+      console.log(error);
     }
-  }).catch(function (e) {
-    console.error(e);
+  } else {
+    console.log("Web NFC is not supported.");
+  }
+}
+
+function scannerView( ){
+  if (!("NDEFReader" in window))
+    return alert("該裝置不支援掃描");
+  document.querySelector(".scanner-block").classList.add("scanner-block-enable");
+  document.querySelector(".scanner-block").classList.remove("scanner-block-disable");
+
+  document.querySelector("#scan-head").innerText = "等待掃描";
+  document.querySelector("#scan-body").innerText = "...";
+  document.querySelector('#scan-add').onclick = () => { alert("尚未掃描") };
+  document.querySelector("#scan-cancel").onclick = ( ) => {
+    document.querySelector(".scanner-block").classList.remove("scanner-block-enable");
+    document.querySelector(".scanner-block").classList.add("scanner-block-disable");
+  }
+
+  scan_nfc_tag( {
+    name:'#scan-head',
+    value:'value',
+    func: ( uid ) => {
+      let uri = `/api/v1/shsd/nfc_tag/${uid}`
+
+      fetch(uri, {method:"GET"}).then( res => {
+        if( res.status == 401 ){
+          alert("登入憑證失效");
+          return location.href = "/";
+        }
+        res.json().then( data  => {
+          let gd = (group_data.find( v=>v.dgs_id == data.form_id ) || {dgs_id:0, name:"未找到"});
+          document.querySelector("#scan-head").innerText = data.tag_name;
+          document.querySelector("#scan-body").innerText = `${gd.dgs_id} - ${gd.name}`;
+          document.querySelector('#scan-add').onclick = () => {
+
+            document.querySelector("#scan-head").innerText = "等待掃描";
+            document.querySelector("#scan-body").innerText = "...";
+            document.querySelector('#scan-add').onclick = () => { alert("尚未掃描") };
+            document.querySelector(".scanner-block").classList.remove("scanner-block-enable");
+            document.querySelector(".scanner-block").classList.add("scanner-block-disable");
+            document.groupSelector.onsubmit( { group: gd.dgs_id } );
+          }
+        });
+      })
+    }
+  } );
+
+}
+
+function search_nfc_tag( uid ){
+  let uri = `/api/v1/shsd/nfc_tag/${uid}`;
+  fetch( uri, {
+    method:"GET"
+  }).then( res => {
+    if( res.state == 401 ){
+      alert("登入失效");
+      return location.href = '/';
+    }
+    res.json().then( data => {
+      if( data.e ){
+        document.querySelector('#scan-name').innerText = `${data.e}`;
+      }else{
+        document.querySelector('#scan-name').innerText = `名稱: ${data['tag_name']}`;
+      }
+    } );
   });
 }
 
@@ -294,6 +359,7 @@ function dragStart( e ){
 
 function applyGroupSelector( json ){
   let form = document.groupSelector;
+  group_data = json;
   form.sel_group.innerHTML = "";
   // let optGroup = createElement("optgroup", {label:"請選擇一個項目"});
   form.sel_group.appendChild( createElement("option", { innerText:"請選擇一個項目", hidden:true}) );
@@ -306,8 +372,9 @@ function applyGroupSelector( json ){
     }));
   }
 
-  document.groupSelector.onsubmit = function( ){
-    let body = JSON.stringify({ group: this.sel_group.value });
+  document.groupSelector.onsubmit = function( data ){
+    data = data.isTrusted ? { group: this.sel_group.value } : data
+    let body = JSON.stringify( data );
     let uri = `/api/v1${location.pathname}`;
 
     if( unsaved == true && !confirm("您尚未存檔, 確定要新增項目？") ){
