@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% include ../template/style %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- <script src="/src/js/jquery.min.js"></script> -->
+    <script src="/src/js/qrcode.min.js"></script>
+    <script src="/src/js/shsd/drs_nfc_tag.js"></script>
+    <script src="/src/js/instascan.min.js"></script>
+    <link rel="stylesheet" href="/src/css/drs_nfc_tag.css">
+    <title>Create NFC Link | Admin</title>
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main class="container">
+    <div class="form">
+      <div class="mb-3 form-block">
+        <form action="/api/v1/drs_nfc_tag" name="submit_form">
+
+          <div class="input-group mb-3">
+            <label for="group_id" class="form-label lead">組別：</label>
+            <select name="group_id" class="form-control" id="group_id" placeholder="請選擇組別">
+              <option disabled default>載入中...</option>
+            </select>
+          </div>
+
+          <div class="input-group mb-3">
+            <input id="nfc-tag-name" type="text" class="form-control" placeholder="輸入 NFC 名稱" aria-label="名稱">
+          </div>
+
+          <div class="input-group mb-3">
+            <input id="nfc-tag-value" type="text" class="form-control" placeholder="輸入 NFC Tag 內碼" aria-label="NFC Tag UID" aria-describedby="nfc-tag-id">
+            <div class="input-group-append">
+              <button id="scan_nfc" class="btn btn-outline-secondary" type="button" id="nfc-tag-id">手機掃描</button>
+            </div>
+          </div>
+
+          <div class="input-group mb-3">
+            <span class="lead">操作：</span>
+            <input id="post_method" type="radio" name="_method" class="lead" value="POST" checked>
+            <label for="post_method" class="lead"> 新增　</label>
+  
+            <input id="put_method" type="radio" name="_method" class="lead" value="PUT" >
+            <label for="put_method" class="lead"> 修改　</label> 
+
+            <input id="delete_method" type="radio" name="_method" class="lead" value="DELETE">
+            <label for="delete_method" class="lead"> 刪除　</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary">建立</button>
+          <button id="scanner" type="button" class="btn btn-success">掃描測試</button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <div class="scanner-block scanner-block-disable">
+    <div class="scan-contain">
+      <div class="row">
+        <div id="scan-name" class="col-12">
+          卡片名稱
+        </div>
+        <div class="col-12">
+          <span class="lead" id="scan-res">內碼</span>
+          <!-- <button class="btn btn-success">Control</button> -->
+        </div>
+      </div>
+    </div>
+    點擊灰色區域退出
+  </div>
+</body>
+</html>

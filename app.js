@@ -67,7 +67,7 @@ app.use(helmet.hsts({
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(session({
 	secret:random( { length:256 } ), 
-	cookie:{ maxAge: 30 * 60 * 1000 },
+	cookie:{ maxAge: 6 * 60 * 60 * 1000 },
 	path:'/tmp'
 }));
 app.use(helmet());

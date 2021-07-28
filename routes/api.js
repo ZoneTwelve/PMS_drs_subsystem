@@ -305,5 +305,82 @@ router.delete('/shsd/drs_sheet', ( req, res ) => {
   } )
 });
 
+router.get("/shsd/nfc_tag/:id", ( req, res ) => {
+  let tagid = req.params.id;
+  if( !/^[0-9A-F]/.test(tagid) ){
+    return res.status(400).send({e:"Not allow this tag id"});
+  }else{
+    res.database.query("SELECT * FROM DRS_etag_link WHERE tag_hash = ?;", [tagid], (e, d, f)=>{
+      if( e || d.length == 0 ){
+        return res.status(500).send({e:"Search failed or not exist"});
+      }else{
+        return res.send( d[0] );
+      }
+    });
+  }
+});
+
+router.post("/shsd/nfc_tag", (req, res) => {
+  let gid = ( parseInt(req.body.gid) || undefined ),
+      tid = ( req.body.tid || undefined )
+      tname = req.body.name || undefined;
+  if( gid == undefined || tid == undefined || tname == undefined ){
+    return res.status( 400 ).send({e:"Missing parameters"});
+  }else if( !/^[A-F0-9]/.test( tid ) ){
+    return res.status( 400 ).send({e:"Wrong pattern"});
+  }else{
+    res.database.query( "INSERT INTO DRS_etag_link (tag_id, tag_name, form_id, tag_hash) VALUES ( NULL, ?, ?, ?);", 
+                        [ tname, gid, tid ], 
+    (e, d, f) => {
+      if( e ){
+        console.log( e );
+        res.status(500).send( {e:"Failed, 請確定該卡未使用"} );
+      }else{
+        res.send({m:"OK"});
+      }
+    } );
+  }
+});
+
+router.put("/shsd/nfc_tag", (req, res)=>{
+  let gid = ( parseInt(req.body.gid) || undefined ),
+      tid = ( req.body.tid || undefined ),
+      tname = req.body.name || undefined;
+  if( gid == undefined || tid == undefined || tname == undefined ){
+    return res.status( 400 ).send({e:"Missing parameters"});
+  }else if( !/^[A-F0-9]/.test( tid ) ){
+    return res.status( 400 ).send({e:"Wrong pattern"});
+  }else{
+    res.database.query("UPDATE DRS_etag_link SET tag_name = ?, form_id = ? WHERE tag_hash = ?;",
+                        [ tname, gid, tid ], 
+    (e, d, f)=>{
+      if( e ){
+        console.log( e );
+        return res.status( 500 ).send({e:"UPDATE Failed"});
+      }else{
+        return res.send( {m:"OK"} );
+      }
+    });
+  }
+});
+
+router.delete("/shsd/nfc_tag", (req, res)=>{
+  let tid = ( req.body.tid || undefined );
+  if( tid == undefined ){
+    return res.status(400).send({e:"Missing parameter"});
+  }else if( !/^[A-F0-9]/.test( tid ) ){
+    return res.status(400).send({e:"Not allow"});
+  }else{
+    res.database.query("DELETE FROM DRS_etag_link WHERE tag_hash = ?;", [ tid ], 
+    (e, d, f)=>{
+      if( e ){
+        return res.status(500).send({m:"DELETE failed!"});
+      }else{
+        return res.send({m:"OK"});
+      }
+    });
+  }
+});
+
 
 module.exports = router;

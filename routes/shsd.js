@@ -29,5 +29,9 @@ router.get("/generate_qrcode", ( req, res ) => {
   res.render( "shsd/gen_qrcode", { ssrf_token: req.session.ssrf, navtitle:"QRCode生成" } );
 });
 
+router.get("/set_nfc_tag", ( req, res )=>{
+  res.render( "shsd/set_nfc_tag", { ssrf_token: req.session.ssrf, navtitle:"NFC 掃描設定"});
+});
+
 
 module.exports = router;

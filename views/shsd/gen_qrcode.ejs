@@ -9,6 +9,7 @@
     <!-- <script src="/src/js/jquery.min.js"></script> -->
     <script src="/src/js/qrcode.min.js"></script>
     <script src="/src/js/shsd/drs_gen_qrcode.js"></script>
+    <script src="/src/js/instascan.min.js"></script>
     <link rel="stylesheet" href="/src/css/generate_qrcode.css">
     <title>Generate QR Code | Admin</title>
 </head>
@@ -26,10 +27,25 @@
       </div>
 
       <div id="qrcode"></div>
-      <!-- <p id="content">...</p> -->
+      <p id="content">...</p>
       <br>
       <button id="generate" type="submit" class="btn btn-primary">生成</button>
+      <button id="scanner" type="button" class="btn btn-success">掃描測試</button>
     </div>
   </main>
+  <div class="scanner-block scanner-block-disable">
+    <div class="scan-contain">
+      <div class="row">
+        <div class="col-12">
+          <video src="" id="preview"></video>
+        </div>
+        <div class="col-12">
+          <span class="lead" id="qr-res">Text here</span>
+          <!-- <button class="btn btn-success">Control</button> -->
+        </div>
+      </div>
+    </div>
+    點擊灰色區域退出
+  </div>
 </body>
 </html>
