@@ -32,7 +32,6 @@ async function scan_nfc_tag( target ){
       }
     } catch(error) {
       alert( error );
-      console.log(error);
     }
   } else {
     console.log("Web NFC is not supported.");
@@ -128,12 +127,12 @@ function applySheetColumns( data ){
     // "G"+d.form_id+" - "+d.title  → Original method
     // `G${d.form_id} - ${d.title}` → Javascript ES6
     // "G$d.form_id - $d.title" → PHP 
-    // console.log( d );
+
     let head = createElement("div", {className:"row item-head"});
     let idlen = -(data.length > 9 ? 2 : 1);
     let order_id = ( i + 1 ); //d.order_id == 0 ? (i+1) : d.order_id;
     let oid   = ("0"+(order_id)).substr( idlen ); // order id
-    // console.log( idlen );
+
     head.appendChild( 
       createElement("span",  { innerText:`(${oid}) G${d.form_id} - ${d.title}`, className:"title lead px-2 col-11" })
       // createElement("div", {className:"col-8"}).appendChild(
@@ -148,8 +147,42 @@ function applySheetColumns( data ){
     chunk.appendChild( head );
     chunk.appendChild(createElement("input", { type:"hidden", name:"colid[]", value:d.col_id, className:"db" }))
     chunk.appendChild(createElement("input", { type:"hidden", name:"newid[]", value:order_id, className:"db" }))
-    console.log( d );
-    chunk.appendChild(createElement("input", { placeholder: "狀態", name:"state[]", className:"db form-control pt-a", value: (d.state || ""), oninput: formGlobalCheck }));
+
+    let dataBlock = createElement("div", {className: "form-group"});
+    switch( d.datatype ){
+      case 'boolean':
+        dataBlock.className += " form-check form-check-inline";
+        let trueID = `c-${d.col_id}-opt-true`,
+            falseID = `c-${d.col_id}-opt-false`;
+        let checkedVar = d.state!=null ? (d.state == 1) : undefined;
+        dataBlock.appendChild(createElement("input", { type:"radio", id: trueID, name:"state[]", className:"db form-check-input radio-opt-red", oninput: formGlobalCheck }));
+        dataBlock.appendChild(createElement("label", { innerText:"有狀況", value:"1", htmlFor: trueID, className:"form-check-label lead" }));
+        dataBlock.appendChild(createElement("br"));
+        dataBlock.appendChild(createElement("input", { type:"radio", id: falseID, name:"state[]", className:"form-check-input radio-opt-blue", oninput: formGlobalCheck }));
+        dataBlock.appendChild(createElement("label", { innerText:"無狀況", value:"0", htmlFor: falseID, className:"form-check-label lead" }));
+
+        if( checkedVar != undefined )
+          dataBlock.querySelector(`input#${checkedVar?trueID:falseID}`).checked = true;
+      break;
+      case "integer":
+        let numid = `n-${d.col_id}`;
+        dataBlock.appendChild(createElement("label"), { innerText:"數值：", htmlFor:numid })
+        dataBlock.appendChild(createElement("input", { 
+          type:"number", id:numid, className:"db form-control", 
+          value: (parseInt(d.state) || 0), placeholder:"數值", 
+          name:"state[]",
+          oninput: ( self ) => {
+            self.target.value = parseInt(self.target.value);
+            formGlobalCheck( self.target );
+        } }))
+      break;
+      case "string":
+        dataBlock.appendChild(createElement("input", { placeholder: "狀態", name:"state[]", className:"db form-control pt-a", value: (d.state || ""), oninput: formGlobalCheck }));
+      break;
+      default:
+        dataBlock.appendChild("p", {innerText:"Error here"});
+    }
+    chunk.appendChild( dataBlock );
 
     chunk.appendChild(createElement("input", { placeholder: "備註", name:"notes[]", className:"db form-control pt-a", value: (d.notes || ""), oninput: formGlobalCheck }));
     block.appendChild( chunk );
@@ -166,24 +199,37 @@ function applySheetColumns( data ){
 
   form.onsubmit = ( callback ) => {
     let uri = `/api/v1${location.pathname}`;
-    let dataElement = document.querySelectorAll('.db');
-    let data = new Object(); // { 'colid[]': [], 'state[]': [], 'notes[]': [] };
-    for( let i = 0 ; i < dataElement.length ; i += 4 ){
-      let column = dataElement[ i ],
-          status = dataElement[i+1],
-          note   = dataElement[i+2],
-          newid  = dataElement[i+3];
-      
-      data[ column.name ] = data[ column.name ] || [];
-      data[ newid.name  ] = data[ newid.name  ] || [];
-      data[ status.name ] = data[ status.name ] || [];
-      data[  note.name  ] = data[  note.name  ] || [];
-
-      data[ column.name ].push( column.value );
-      data[ newid.name  ].push( newid.value  );
-      data[ status.name ].push( status.value );
-      data[  note.name  ].push( note.value   );
+  
+    // submit data
+    let form = document.checklist;
+    let names = [ "colid[]", 'newid[]', 'state[]', 'notes[]' ];
+    let data = new Object(); // { 'colid[]': [], 'newid[]': [], 'state[]': [], 'notes[]': [] };
+    for( let i = 0 ; i < names.length ; i++ ){
+      let n = names[ i ];
+      data[ n ] = [];
+      let table = form.querySelectorAll(".info-block");
+      for(let el of table){
+        let e = el.querySelector( `[name="${n}"]` );
+        console.log( n, e.value, e );
+        data[ n ].push( (e.type != 'radio') ? e.value : (e.checked?'1':'0') );
+      }
     }
+    // for( let i = 0 ; i < dataElement.length ; i += 4 ){
+    //   let column = dataElement[ i ],
+    //       status = dataElement[i+1],
+    //       note   = dataElement[i+2],
+    //       newid  = dataElement[i+3];
+      
+    //   data[ column.name ] = data[ column.name ] || [];
+    //   data[ newid.name  ] = data[ newid.name  ] || [];
+    //   data[ status.name ] = data[ status.name ] || [];
+    //   data[  note.name  ] = data[  note.name  ] || [];
+
+    //   data[ column.name ].push( column.value );
+    //   data[ newid.name  ].push( newid.value  );
+    //   data[ status.name ].push( status.value );
+    //   data[  note.name  ].push( note.value   );
+    // }
     form.innerHTML = "<h1>Loading...</h1>"
     request(uri, {
       headers: { 'Content-Type': 'application/json' },
@@ -201,10 +247,12 @@ function applySheetColumns( data ){
     dragItems();
 }
 
-function formGlobalCheck( ){
+function formGlobalCheck( self ){
   unsaved = true;
-  this.classList.add( "unsaved" );
-  console.log( this );
+  if( self && self.tagName != undefined )
+    self.classList.add( "unsaved" );
+  else
+    this.classList.add( "unsaved" );
 }
 
 function dragItems( ){
@@ -259,29 +307,24 @@ function updateNewColumnsID( ){
   let nid = document.querySelectorAll('[name="newid[]"]');
   for(let el of nid){
     uid_list.push( parseInt( el.value ) );
-    // console.log( el.value );
   }
   let list = uid_list.slice().sort();
-  console.log( uid_list, list );
   for( let i = 0 ; i < nid.length ; i++ ){
     nid[ i ].value = list[ i ];
   }
-  // let list = uid_list.sort((a,b)=>a>b);
-  // console.log( list, uid_list );
 }
 
 
 function closest( el, target, params ){
   params = params || { };
   while( el != null ){
-    // console.log( el );
     if(  el.tagName.toLowerCase() == target.toLowerCase() ){
       let keys = Object.keys( params );
       let same = true && keys.length > 0;
       for(let key of keys){
         if( el[ key ].indexOf( params[ key ] ) == -1 ){
           same = false;
-          // console.log( key );
+
         }
       }
       if( same )
@@ -296,25 +339,22 @@ function removeThisItem( el = undefined ){
   let uri = `/api/v1${location.pathname}`;
   let block = closest( this, "div", {className:"info-block"} );
 
-  let dataElement = document.querySelectorAll('.db');
-  let data = new Object(); // { 'colid[]': [], 'state[]': [], 'notes[]': [] };
-  for( let i = 0 ; i < dataElement.length ; i += 4 ){
-    let column = dataElement[ i ],
-        status = dataElement[i+1],
-        note   = dataElement[i+2],
-        newid  = dataElement[i+3];
-    
-    data[ column.name ] = data[ column.name ] || [];
-    data[ newid.name  ] = data[ newid.name  ] || [];
-    data[ status.name ] = data[ status.name ] || [];
-    data[  note.name  ] = data[  note.name  ] || [];
-
-    data[ column.name ].push( column.value );
-    data[ newid.name  ].push( newid.value  );
-    data[ status.name ].push( status.value );
-    data[  note.name  ].push( note.value   );
+  // submit data
+  let form = document.checklist;
+  let names = [ "colid[]", 'newid[]', 'state[]', 'notes[]' ];
+  let data = new Object(); // { 'colid[]': [], 'newid[]': [], 'state[]': [], 'notes[]': [] };
+  for( let i = 0 ; i < names.length ; i++ ){
+    let n = names[ i ];
+    data[ n ] = [];
+    let table = form.querySelectorAll(".info-block");
+    for(let el of table){
+      let e = el.querySelector( `[name="${n}"]` );
+      data[ n ].push( (n == 'state[]' && e.type != 'radio') ? e.value : (e.checked?1:0) );
+    }
   }
-  // form.innerHTML = "<h1>Loading...</h1>"
+
+
+  form.innerHTML = "<h1>Loading...</h1>"
   request(uri, {
     headers: { 'Content-Type': 'application/json' },
     method: "PUT",
@@ -323,7 +363,6 @@ function removeThisItem( el = undefined ){
     if( block != null ){
       let title = block.querySelector('span.title').innerText;
       let colid = block.querySelector('[name="colid[]"]').value;
-      console.log( "remove this item", colid );
       Swal.fire({
         title,
         icon: 'warning',
@@ -367,7 +406,6 @@ function applyGroupSelector( json ){
   // let optGroup = createElement("optgroup", {label:"請選擇一個項目"});
   form.sel_group.appendChild( createElement("option", { innerText:"請選擇一個項目", hidden:true}) );
   for( let obj of json ){
-    console.log( obj );
     form.sel_group.appendChild( createElement("option", {
       innerText: `${obj.dgs_id} - ${obj.name} ${obj.visible==0 ? "(QR Code)" : ""}`,
       value: obj.dgs_id,
@@ -381,7 +419,7 @@ function applyGroupSelector( json ){
     let uri = `/api/v1${location.pathname}`;
 
     if( unsaved == true && !confirm("您尚未存檔, 確定要新增項目？") ){
-      // alert("資料已新增");
+
     }else{
       request(uri, {
         headers:{
@@ -394,7 +432,7 @@ function applyGroupSelector( json ){
         if( res.e )
           alert( res.e );
         updateSheetForm();
-        // alert( JSON.stringify(res) );
+
       } );
     }
     return false;
@@ -409,7 +447,7 @@ function request( url, opt ){
 function get( opt, callback ){
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = ( ) => {
-    // console.log( xhr.readyState, xhr.status );
+
     if( xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 304)){
       callback( JSON.parse(xhr.responseText) );
     }

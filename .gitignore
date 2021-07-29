@@ -118,3 +118,4 @@ dist
 certificate.pem
 certrequest.csr
 privatekey.pem
+.vscode

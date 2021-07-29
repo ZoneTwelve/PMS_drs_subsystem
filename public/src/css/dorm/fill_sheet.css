@@ -107,3 +107,10 @@
 .scan-contain video {
   border-radius: 10px;
 }
+
+.radio-opt-red:checked{
+  background: red;
+}
+.radio-opt-blue:checked{
+  background: blue;
+}

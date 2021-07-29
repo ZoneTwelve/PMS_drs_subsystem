@@ -118,8 +118,8 @@ router.post('/dorm/sheet/:id', (req, res) => {
     res.database.query( `SELECT * FROM DRS_def_sheet_cols WHERE group_id = ?`, [ group_id ], (e, data, f) => {
       // INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes) VALUES (NULL, 1, 1, 'A', NULL, ''), (NULL, 1, 1, 'B', '123', ''); 
       let params = [];
-      let sqlc = `INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes) VALUES ${data.map( v=> "(NULL, ?, ?, ?, ?, '')").join(', ')};`;
-      data = data.map( v => [sheet_id, group_id, v.title, v.state,] );
+      let sqlc = `INSERT INTO drs_sql.DRS_sheet_cols (col_id, sheet_id, form_id, title, state, notes, datatype) VALUES ${data.map( v=> "(NULL, ?, ?, ?, ?, '', ?)").join(', ')};`;
+      data = data.map( v => [sheet_id, group_id, v.title, v.state, v.datatype] );
       for( let d of data ){
         params = params.concat( d );
       }
@@ -161,13 +161,14 @@ router.put('/dorm/sheet/:id', (req, res) => {
 
   for( let i = 0 ; i < req.body['colid[]'].length ; i++ ){
     let colid = req.body['colid[]'][ i ],
-        state = req.body['state[]'][ i ],
-        notes = req.body['notes[]'][ i ],
+        state = String(req.body['state[]'][ i ]),
+        notes = String(req.body['notes[]'][ i ]),
         newid = req.body['newid[]'][ i ];
     data.push( colid );
     data.push( state );
     data.push( notes );
     data.push( newid );
+    console.log( colid, state, notes, newid );
   }
   
   res.database.query( sqlc, data, ( e, d, f ) => {
