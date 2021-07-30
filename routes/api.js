@@ -1,4 +1,3 @@
-const { parse } = require('dotenv');
 const express = require('express');
 const router = express.Router();
 
@@ -66,7 +65,7 @@ router.all("*", (req, res, next)=>{
 // GET sheet list
 router.get('/dorm/sheet', (req, res)=>{
   // mysql include format the datetime columns
-  let page = parseInt(req.query.page) || 0;
+  let page = (parseInt(req.query.page) || 0);
   res.database.query( `SELECT * FROM DRS_sheets WHERE 1!=1 UNION SELECT sheet_id, DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s"), dorm, location, reporter FROM DRS_sheets ORDER BY sheet_id desc LIMIT ${page}, 10;`, (e, data, f) => {
     if( e ){
       res.send( 'Error', 500 );

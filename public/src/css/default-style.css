@@ -33,3 +33,26 @@
 .loading::before{
   content: "Loading";
 }
+
+@keyframes dotdotdotTextAnimation{
+  0%{
+    content: "";
+  }
+  10% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  70% {
+    content: "...";
+  }
+}
+.dotdotdot {
+  font-size: 24px;
+}
+.dotdotdot:after {
+  -webkit-animation: dotdotdotTextAnimation 2s linear infinite ;
+          animation: dotdotdotTextAnimation 2s linear infinite ;
+  content: "";
+}
