@@ -7,3 +7,29 @@
   /* background: #f8f9fa; */
   background: #f7f7f7;
 }
+
+@keyframes loadingTextAnimation{
+  0%{
+    content: "";
+  }
+  10% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  70% {
+    content: "...";
+  }
+}
+.loading {
+  font-size: 24px;
+}
+.loading:after {
+  -webkit-animation: loadingTextAnimation 2s linear infinite ;
+          animation: loadingTextAnimation 2s linear infinite ;
+  content: "";
+}
+.loading::before{
+  content: "Loading";
+}

@@ -1,4 +1,9 @@
 var mode = 0;
+const permissionsToRequest = {
+  permissions: ["nfc"],
+  origins: [ location.origin ]
+}
+
 window.onload = function( ){
   fetch("/api/v1/shsd/drs_group", {
     method:"GET",
@@ -26,6 +31,14 @@ window.onload = function( ){
     if (!("NDEFReader" in window)){
       alert( "裝置不支援 NFC" )
     }else{
+      
+      navigator.permissions.query({ name: "nfc" }).then(permissionStatus => {
+        console.log(`NFC user permission: ${permissionStatus.state}`);
+        permissionStatus.onchange = _ => {
+          console.log(`NFC user permission changed: ${permissionStatus.state}`);
+        };
+      });
+      requestPermissions();
       alert("直接掃描即可");
     }
   }
@@ -47,9 +60,41 @@ window.onload = function( ){
 
 }
 
+function requestPermissions() {
+
+  function onResponse(response) {
+    if (response) {
+      console.log("Permission was granted");
+    } else {
+      console.log("Permission was refused");
+    }
+    return browser.permissions.getAll();
+  }
+
+  browser.permissions.request(permissionsToRequest)
+    .then(onResponse)
+    .then((currentPermissions) => {
+    alert(`Current permissions:`, currentPermissions);
+  });
+}
+
 async function scan_nfc_tag( target ){
   if ("NDEFReader" in window) {
     const ndef = new NDEFReader();
+    // alert("Require permission");
+    const nfcPermissionStatus = await navigator.permissions.query({ name: "nfc" });
+    alert( nfcPermissionStatus.state );
+    // if (nfcPermissionStatus.state === "granted") {
+    //   // NFC access was previously granted, so we can start NFC scanning now.
+    //   startScanning();
+    // } else {
+    //   // Show a "scan" button.
+    //   document.querySelector("#scanButton").style.display = "block";
+    //   document.querySelector("#scanButton").onclick = event => {
+    //     // Prompt user to allow UA to send and receive info when they tap NFC devices.
+    //     startScanning();
+    //   };
+    // }
     try {
       await ndef.scan();
       ndef.onreading = (event) => {
@@ -59,6 +104,9 @@ async function scan_nfc_tag( target ){
         if( t['func'] != undefined )
           t['func']( serialNumber );
       }
+      ndef.onreadingerror = () => {
+        alert("Cannot read data from the NFC tag. Try another one?");
+      };
     } catch(error) {
       alert( error );
       console.log(error);

@@ -354,7 +354,7 @@ function removeThisItem( el = undefined ){
   }
 
 
-  form.innerHTML = "<h1>Loading...</h1>"
+  
   request(uri, {
     headers: { 'Content-Type': 'application/json' },
     method: "PUT",
@@ -375,6 +375,7 @@ function removeThisItem( el = undefined ){
         cancelButtonText: '取消'
       }).then( res => {
         if( res.isConfirmed ){
+          form.innerHTML = "<h1>Loading...</h1>";
           request(uri, {
             headers: { 'Content-Type': 'application/json' },
             method:"DELETE",
