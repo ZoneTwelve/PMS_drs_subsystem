@@ -75,7 +75,7 @@ function updateBulletinColumns( data ){
   for( let d of data ){
     let a = createElement("a", { className: "sheet-columns text-decoration-none", title: `${d.poster} ${d.time}` }),
         li = createElement("li", { className: "list-group-item", onclick: () => alertBulletin( d ) }),
-        span = createElement("span", { innerText: `${d.bulletin_id}. ${d.title}` });
+        span = createElement("span", { innerText: `${d.bulletin_id}. ${(d.title || "無標題")}` });
     li.appendChild( span );
     a.appendChild( li );
     columns.appendChild( a );

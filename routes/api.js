@@ -55,8 +55,6 @@ router.all("*", (req, res, next)=>{
   }
 });
 
-
-
 //******************************/
 //* DRS dorm group RESTful API */
 //******************************/
@@ -235,9 +233,11 @@ router.delete('/dorm/sheet/:id', (req, res) => {
 // ------------------------------
 
 router.all("/shsd/*", ( req, res, next ) => {
-  if( req.method != "GET" )
-    next = () => { res.status( 403 ).send( {e:"Unauthorized operation"} ) };
-  return next();
+  if( req.session.aid >= 3 || req.method == "GET" ){
+    return next()
+  }else{
+    return res.status( 403 ).send( {e:"Unauthorized operation"} );
+  }
 });
 
 router.get('/shsd/drs_group', (req, res)=>{
@@ -316,7 +316,7 @@ router.put('/shsd/drs_sheet', ( req, res ) => {
   let datatype = [ 'boolean', 'integer', 'string' ],
       dt = datatype[parseInt( req.body.datatype )];
 
-  res.database.query( `UPDATE drs_sql.DRS_def_sheet_cols SET group_id=?, title=?, state=?, datatype=? WHERE dsc_id = ?; `, 
+  res.database.query( `UPDATE DRS_def_sheet_cols SET group_id=?, title=?, state=?, datatype=? WHERE dsc_id = ?; `, 
                       [ parseInt(req.body.gid), req.body.title, req.body.status, dt, req.body.sid ], 
   ( e, r, f ) => {
     if( e ){
@@ -419,7 +419,7 @@ router.delete("/shsd/nfc_tag", (req, res)=>{
 router.get("/shsd/bulletin", (req, res)=>{
   let page = parseInt( req.query.page ) || 0;
   let defCol = ["bulletin_id", "title", "content", "time", "m_time", "poster"],
-      rulCol = ["bulletin_id", "title", "content", 'DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s")', "m_time", "poster"];
+      rulCol = ["bulletin_id", "title", "content", 'DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s")', 'DATE_FORMAT(m_time, "%Y/%m/%d %H:%i:%s")', "poster"];
   let schema = "DRS_bulletin";
   let order_col = "bulletin_id";
   res.database.query(`SELECT ${defCol.join(", ")} FROM ${schema} WHERE 1!=1 UNION SELECT ${rulCol.join(", ")} FROM ${schema} ORDER BY ${order_col} desc LIMIT ${page}, 10;`, (e, d, f) => {
@@ -433,7 +433,52 @@ router.get("/shsd/bulletin", (req, res)=>{
 });
 
 router.post("/shsd/bulletin", (req, res)=>{
-  //INSERT INTO DRS_bulletin (bulletin_id, title, content, p_time, m_tile, poster) VALUES ("bulletin_id", "title", "content", "p_time", "m_tile", "poster"); 
+  //INSERT INTO DRS_bulletin (bulletin_id, title, content, p_time, m_time, poster) VALUES ("bulletin_id", "title", "content", "p_time", "m_time", "poster"); 
+
+  res.database.query(`INSERT INTO DRS_bulletin (bulletin_id, title, content, time, m_time, poster) VALUES (NULL, '無標題', '', NOW(), NOW(), ?);`,
+  [ req.session.name ], (e, d, f) => {
+    if( e ){
+      console.log( e );
+      return res.status( 500 ).send({e:"Server insert failed"});
+    }else{
+      return res.send( { m: "OK" } );
+    }
+  });
+});
+
+router.put("/shsd/bulletin", (req, res)=>{
+  let { bid, title, content } = req.body;
+  title = title || undefined;
+  content = content || undefined;
+  bid = parseInt( bid ) || undefined;
+  if( title == undefined || content == undefined || bid == undefined ){
+    return res.status( 400 ).send({e:"Wrong format"});
+  }else{
+    res.database.query(`UPDATE DRS_bulletin SET title=?, content=?, m_time=NOW(), poster=? WHERE bulletin_id = ?`,
+    [ title, content, req.session.name, bid ], (e, d, f) => {
+      if( e ){
+        return res.status( 500 ).send({e:"Server insert failed"});
+      }else{
+        return res.send( { m: "OK" } );
+      }
+    });
+  }
+});
+
+router.delete("/shsd/bulletin", (req, res)=>{
+  let { bid } = req.body;
+  bid = parseInt( bid ) || undefined;
+  if( bid == undefined )
+    return res.status(400).send({e:"your fault"});
+
+  res.database.query("DELETE FROM DRS_bulletin WHERE bulletin_id = ?;", [bid],
+  (e, d, f) => {
+    if( e ){
+      return res.status(500).send({e:"Failed to delete bulletin, id:" + bid});
+    }else{
+      return res.send({m:"OK"});
+    }
+  })
 });
 
 

@@ -1,0 +1,71 @@
+main{
+  padding:25px;
+  border-radius: 10px;
+}
+
+.loading > * {
+  display: none;
+}
+
+#sheet-list > ul{
+  /* background: white; */
+}
+
+#sheet-list > ul > a:hover {
+  text-decoration: none;
+}
+.sheet-columns:first-child{
+  border-radius: 5px 5px 0px 0px;
+}
+.sheet-columns:last-child {
+  border-radius: 0px 0px 5px 5px;
+  color:red;
+}
+a.sheet-columns{
+  cursor:pointer;
+  user-select:none;
+  border:1px solid rgba(0,0,0,0.1);
+  transition-duration: 0.3s;
+  background: rgba(0,0,0,0.1);
+}
+a.sheet-columns:hover{
+  border:1px solid rgba(0,0,0);
+}
+a.sheet-columns:active{
+  background: rgba(0,0,0,0.5);
+}
+
+.list-of-page{
+  position: relative;
+  padding: 0px 12px;
+}
+
+.list-of-page > div{
+  text-align: center;
+  padding: 7px 5px 5px 5px;
+  font-size:18px;
+  border: 1px solid rgba(0,0,0,0.1);
+  user-select:none;
+  background: white;
+}
+.list-of-page > div:first-child{
+  border-radius: 5px 0px 0px 5px;
+}
+.list-of-page > div:last-child{
+  border-radius: 0px 5px 5px 0px;
+}
+.list-of-page > div:hover{
+  border: 1px solid rgba(0,0,0,0.5);
+  background: rgb(211, 211, 211, 0.1);
+}
+.list-of-page > div:active{
+  background: rgb(211, 211, 211, 0.5);
+}
+.list-of-page > div.active{
+  /* active style, class: active */
+  background: rgb(211, 211, 211, 0.3);
+}
+
+.hidden-block{
+  display: none;
+}

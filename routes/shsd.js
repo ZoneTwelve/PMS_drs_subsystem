@@ -14,6 +14,9 @@ router.get("/", function(req, res){
   res.render( "shsd/index", { ssrf_token: req.session.ssrf, navtitle:"首頁" } );
 });
 
+router.get("/drs_bulletin", (req, res) => {
+  res.render( "shsd/drs_bulletin", { ssrf_token: req.session.ssrf, navtitle:"公告" });
+});
 
 // management drs groups
 router.get("/drs_groups", (req, res)=>{
