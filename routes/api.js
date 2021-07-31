@@ -233,6 +233,13 @@ router.delete('/dorm/sheet/:id', (req, res) => {
 //   - length: INT
 //     - How many item
 // ------------------------------
+
+router.all("/shsd/*", ( req, res, next ) => {
+  if( req.method != "GET" )
+    next = () => { res.status( 403 ).send( {e:"Unauthorized operation"} ) };
+  return next();
+});
+
 router.get('/shsd/drs_group', (req, res)=>{
   res.database.query(`SELECT * FROM DRS_def_groups`, ( e, d, f )=>{
     if( e ){
@@ -407,6 +414,26 @@ router.delete("/shsd/nfc_tag", (req, res)=>{
       }
     });
   }
+});
+
+router.get("/shsd/bulletin", (req, res)=>{
+  let page = parseInt( req.query.page ) || 0;
+  let defCol = ["bulletin_id", "title", "content", "time", "m_time", "poster"],
+      rulCol = ["bulletin_id", "title", "content", 'DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s")', "m_time", "poster"];
+  let schema = "DRS_bulletin";
+  let order_col = "bulletin_id";
+  res.database.query(`SELECT ${defCol.join(", ")} FROM ${schema} WHERE 1!=1 UNION SELECT ${rulCol.join(", ")} FROM ${schema} ORDER BY ${order_col} desc LIMIT ${page}, 10;`, (e, d, f) => {
+    if( e ){
+      console.log( e );
+      return res.status(500).send( {e:"Search bulletin failed"} );
+    }else{
+      return res.send( d );
+    }
+  });
+});
+
+router.post("/shsd/bulletin", (req, res)=>{
+  //INSERT INTO DRS_bulletin (bulletin_id, title, content, p_time, m_tile, poster) VALUES ("bulletin_id", "title", "content", "p_time", "m_tile", "poster"); 
 });
 
 

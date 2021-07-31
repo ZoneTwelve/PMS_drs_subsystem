@@ -1,34 +1,23 @@
 var page = 0;
 window.onload = ( ) => {
   downloadSheets( );
+  downloadBulletin( );
 }
 
 function downloadSheets(){
-  console.log( 'Page:', page );
   request( `/api/v1/dorm/sheet?page=${parseInt( page ) * 10}`, {
     method: "GET",
     headers:{
       "User-Agent": "Fetch API Agent"
     }
-  }).then( data =>{
-    if( data.e ){
-      return ( data.f || (( ) => {}) )( data ); // execute function LOL
-    }
-    document.querySelector("#sheet-list").classList.remove("loading");
-    updateSheetColumns( data );
-  });
+  }).then( ( data ) => nextAction( data, "#sheet-list", updateSheetColumns ));
 }
 
 function updateSheetColumns( data ){
   // create sheet columns 
   let block = document.querySelector("#sheet-list");
   let sheet = createElement("ul", { className: "list-group pt-3 lead" });
-
   block.innerHTML = "";
-
-  document.querySelector("#new-sheet-btn").onclick = ( ) => document.new_sheet.submit();
-  if( data.length == 0 )
-    block.appendChild( createElement("h2", { innerText:"No Data", className: "dotdotdot" }) );
 
   for( let d of data ){
     let a = createElement("a", { className: "sheet-columns text-decoration-none" }),
@@ -42,9 +31,13 @@ function updateSheetColumns( data ){
     li.appendChild( sub );
     a.appendChild( li );
     sheet.appendChild( a );
-    console.log( d );
   }
   block.appendChild( sheet );
+
+  // if data is empty create a message "No Data" with animation
+  document.querySelector("#new-sheet-btn").onclick = ( ) => document.new_sheet.submit();
+  if( data.length == 0 )
+    block.appendChild( createElement("h2", { innerText:"No Data", className: "dotdotdot" }) );
 
   let selectPage = createElement("div", { className: "row list-of-page pt-3" });
   selectPage.appendChild( createElement("div", { className: "col-2", innerText: '﹤' , onclick: () => {
@@ -68,6 +61,48 @@ function updateSheetColumns( data ){
   block.appendChild( selectPage );
 }
 
+function downloadBulletin( ){
+  request( "/api/v1/shsd/bulletin", {
+    method:"GET"
+  } ).then( ( data ) => nextAction( data, "#bulletin", updateBulletinColumns ) );
+}
+
+function updateBulletinColumns( data ){
+  let block = document.querySelector("#bulletin");
+  let columns = createElement("ul", { className: "list-group pt-3 lead" });
+  block.innerHTML = "";
+  for( let d of data ){
+    let a = createElement("a", { className: "sheet-columns text-decoration-none", title: `${d.poster} ${d.time}` }),
+        li = createElement("li", { className: "list-group-item", onclick: () => alertBulletin( d ) }),
+        span = createElement("span", { innerText: `${d.bulletin_id}. ${d.title}` });
+    li.appendChild( span );
+    a.appendChild( li );
+    columns.appendChild( a );
+  }
+  block.appendChild( columns );
+}
+
+function alertBulletin( data ){
+  if( 'Swal' in window ){
+    Swal.fire(
+      `<h1 style="text-align:left;"><b>標題</b>:${data.title}</h1>`,
+`<div class="container" style="text-align:left;">
+<p><span class="lead">內文</span>： ${data.content}</p>
+<p><span class="">時間</span>： ${data.time}</p>
+<p><span class="">作者</span>： ${data.poster}</p>
+</div>`
+    )
+  }else{
+    let msg =
+`標題: ${data.title}
+
+內文： ${data.content}
+時間： ${data.time}
+作者： ${data.poster}`
+    alert( msg );
+  }
+}
+
 // because i was trying every idea on fetch, so i didn't write to base_function.js
 // Error code dh01 using for request function
 function request( uri, opt ){
@@ -85,4 +120,12 @@ function request( uri, opt ){
     }
     return res.json();
   });
+}
+
+function nextAction( data, target, next ){
+  if( data.e ){
+    return ( data.f || (( ) => {}) )( data ); // execute function LOL
+  }
+  document.querySelector( target ).classList.remove("loading");
+  next( data );
 }
