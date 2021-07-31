@@ -36,8 +36,9 @@ function updateSheetColumns( data ){
           location.href = `/dorm/sheet/${d.sheet_id}`;
         } }),
         sub = createElement("sub", { innerText: d.time }),
-        span = createElement("span", { innerText: `${d.sheet_id}. ${d.reporter}` });
+        span = createElement("span", { innerText: `${d.sheet_id}. ${d.owner} ` });
     li.appendChild( span );
+    // li.appendChild( createElement("br") );
     li.appendChild( sub );
     a.appendChild( li );
     sheet.appendChild( a );

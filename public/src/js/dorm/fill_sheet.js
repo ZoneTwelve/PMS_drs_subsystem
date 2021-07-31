@@ -442,7 +442,22 @@ function applyGroupSelector( json ){
 
 // just using for transfer data into json
 function request( url, opt ){
-  return fetch( url, opt ).then( res => res.json() );
+  const alertError = ( d ) => alert( d.e );
+  const seCode = "df01"; // service error code, d → dorm, f → fill_sheet, id = 01 ( The No.1 application )
+  const reason = {
+    401:{ e: "登入憑證失效", f: () => location.href = '/?e=0' },
+    403:{ e: "Error 403\n這不是你的日誌" },
+    404:{ e: `Error 404\n找不到資源，請告知網管。\nCode: ${seCode}` },
+    500:{ e: "伺服器錯誤" },
+  }
+  return fetch( url, opt ).then( res => {
+    if( res.status != 200 ){
+      let result = reason[ res.status ] || { e:"Not support error status", f:() => alert(`發生錯誤，需要回報給網管時，請紀錄錯誤代碼。\nSomething failed QwQ\nError Code: dh01-${res.status}`) };
+      result['f'] = result['f'] || alertError;
+      return result;
+    }
+    return res.json();
+  } );
 }
 
 function get( opt, callback ){

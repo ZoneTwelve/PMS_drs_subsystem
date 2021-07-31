@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const api_version = "v1";
 /* GET home page. */
 router.get('/', (req, res) => {
   res.end( res.database==null  ? 'failed' : 'success' );
@@ -9,7 +9,8 @@ router.get('/', (req, res) => {
 router.post("/login", (req, res)=>{
   let { ACC, PWD } = req.body;
 
-  res.database.query( `SELECT * FROM SMS_member WHERE username="${encodeURIComponent(ACC)}" AND password="${PWD}"`, (err, r, fields) => {
+  res.database.query( `SELECT * FROM SMS_member WHERE username=? AND password=?`,
+  [ACC, PWD], (err, r, fields) => {
     if( err ){
       return res.status( 500 ).send( { error:"" } );
     }
@@ -17,6 +18,8 @@ router.post("/login", (req, res)=>{
     if( r.length > 0 ){
       req.session.uid = String( r[0]['no'] );
       req.session.aid = parseInt( r[0]['authority'] );
+      req.session.name = String( r[0]['name'] );
+      req.session.uname = String( r[0]['username'] );
       req.session.ssrf = (~~(Math.random() * 0xffffffff + 0x10000000)).toString( 16 );
       return res.redirect('/');
     }else{
@@ -66,8 +69,14 @@ router.all("*", (req, res, next)=>{
 router.get('/dorm/sheet', (req, res)=>{
   // mysql include format the datetime columns
   let page = (parseInt(req.query.page) || 0);
-  res.database.query( `SELECT * FROM DRS_sheets WHERE 1!=1 UNION SELECT sheet_id, DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s"), dorm, location, reporter FROM DRS_sheets ORDER BY sheet_id desc LIMIT ${page}, 10;`, (e, data, f) => {
+  let defCol = ["sheet_id", "time", "owner", "location"],
+      rulCol = ["sheet_id", 'DATE_FORMAT(time, "%Y/%m/%d %H:%i:%s")', "owner", "location"];
+  if( defCol.length != rulCol.length )
+    return res.status(500).send({e:`Server 的設定錯誤, 於 /api/${ api_version }/dorm/sheet`});
+  res.database.query( `SELECT ${defCol.join(", ")} FROM DRS_sheets WHERE 1!=1 UNION SELECT ${rulCol.join(", ")} FROM DRS_sheets ORDER BY sheet_id desc LIMIT ${page}, 10;`, 
+  (e, data, f) => {
     if( e ){
+      console.log( e );
       res.send( 'Error', 500 );
     }else{
       res.json( data );
@@ -78,7 +87,9 @@ router.get('/dorm/sheet', (req, res)=>{
 
 // CREATE new sheet
 router.post('/dorm/sheet', (req, res)=>{ 
-  res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, dorm, location, reporter) VALUE ( NULL, NOW(), 'dorm', 'location', 'reporter' );`, (e, _d, _f) => {
+  res.database.query( `INSERT INTO DRS_sheets (sheet_id, time, owner, location, reporter) VALUE ( NULL, NOW(), ?, 'location', ? );`,
+  [ req.session.name, req.session.uname ], 
+  (e, _d, _f) => {
     res.database.query(`SELECT LAST_INSERT_ID();`, (_e, d, _f)=>{
       if( e ){
         console.error( e );
@@ -91,6 +102,20 @@ router.post('/dorm/sheet', (req, res)=>{
     });
   });
 });
+
+const authorizedSheetOwner = ( req, res, next ) => {
+  res.database.query("SELECT * FROM DRS_sheets WHERE sheet_id = ? AND reporter = ?", 
+  [ parseInt( req.params.id ), req.session.uname ],
+  (e, data, f)=>{
+    if( e ){
+      return res.status( 500 ).send( {e:"Server side error"} );
+    }else if( data.length ==1 && data[0].reporter === req.session.uname ){
+      return next();
+    }else{
+      return res.status( 403 ).send({ e:"Unauthorized failed ( 無權限 )" });
+    }
+  });
+}
 
 // GET sheet content
 router.get('/dorm/sheet/:id', (req, res) => {
@@ -106,6 +131,7 @@ router.get('/dorm/sheet/:id', (req, res) => {
 });
 
 // CREATE sheet content ( from groups subcontent)
+router.post("/dorm/sheet/:id", authorizedSheetOwner);
 router.post('/dorm/sheet/:id', (req, res) => {
   // please check currect user & reporter are the same person
   let sheet_id = parseInt( req.params.id  ) || undefined, // when sheet_id is a string, he will got undefined
@@ -134,6 +160,7 @@ router.post('/dorm/sheet/:id', (req, res) => {
   }
 });
 
+router.put("/dorm/sheet/:id", authorizedSheetOwner);
 router.put('/dorm/sheet/:id', (req, res) => {
   /*
     INSERT INTO TABLE (a,b,c) VALUES 
@@ -167,7 +194,6 @@ router.put('/dorm/sheet/:id', (req, res) => {
     data.push( state );
     data.push( notes );
     data.push( newid );
-    console.log( colid, state, notes, newid );
   }
   
   res.database.query( sqlc, data, ( e, d, f ) => {
@@ -179,6 +205,7 @@ router.put('/dorm/sheet/:id', (req, res) => {
   });
 });
 
+router.delete('/dorm/sheet/:id', authorizedSheetOwner);
 router.delete('/dorm/sheet/:id', (req, res) => {
   let sheet_id = parseInt( req.params.id ) || undefined,
       col_id = parseInt( req.body.col ) || undefined;
