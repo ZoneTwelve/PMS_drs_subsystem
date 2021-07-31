@@ -81,3 +81,52 @@ a.sheet-columns:active{
   /* active style, class: active */
   background: rgb(211, 211, 211, 0.3);
 }
+
+
+#chat > .row > div{
+  margin: auto;
+  background: white;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
+#chat-ctrl > * {
+  border-radius: 0px;
+}
+
+#chat-msgs{
+  padding-top: 15px;
+  min-height: 500px;
+  max-height: 500px;
+  border-radius: 10px 0px 0px 0px;
+  scroll-behavior: smooth;
+  transition-duration: 2s;
+}
+#chat-ctrl{
+  border-radius: 5px;
+  padding:0px;
+  /* min-height: 50px; */
+}
+#chat-ctrl > input {
+  border-radius: 0px 0px 0px 5px;
+}
+#chat-ctrl > button {
+  border-radius: 0px 0px 5px 0px;
+}
+
+#chat-msgs > .msg-content:not(:last-child){
+  word-wrap: break-word;
+  padding-left: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dotted black;
+}
+
+.msg-content > b{
+  user-select: none;
+}
+
+.youself{
+  color:gray;
+}
+.youself:hover{
+  color:black;
+}

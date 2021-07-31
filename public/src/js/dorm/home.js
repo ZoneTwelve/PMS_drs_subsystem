@@ -2,6 +2,7 @@ var page = 0;
 window.onload = ( ) => {
   downloadSheets( );
   downloadBulletin( );
+  loadChatroom( );
 }
 
 function downloadSheets(){
@@ -47,10 +48,10 @@ function updateSheetColumns( data ){
   for( let i = (page || 1) - 1 ; i < (page || 1) + 3 ; i++ ){
     let active = ( page == i ) ? ' active' : '';
     selectPage.appendChild( createElement("div", { className: `col-2 ${active}`, innerText: (data.length < 10 && (i || 0) > page)?"...":`${i + 1}`, onclick: ( self ) => {
-      let p = (parseInt( self.target.innerText ) - 1) || null;
-      if( data.length < 10 && p > page || p == null )
-        return;
-      page = p;
+      let p = (parseInt( self.target.innerText )) || null;
+      if( data.length < 10 && p > page || p === null )
+        return ;
+      page = p - 1;
       downloadSheets( );
     } }) );
   }
@@ -80,6 +81,12 @@ function updateBulletinColumns( data ){
     columns.appendChild( a );
   }
   block.appendChild( columns );
+}
+
+function loadChatroom( ){
+  document.querySelector("#chat").classList.remove( "loading" );
+  let chatMsg = document.querySelector("#chat-msgs");
+  chatMsg.scrollTop = chatMsg.scrollHeight;
 }
 
 function alertBulletin( data ){
