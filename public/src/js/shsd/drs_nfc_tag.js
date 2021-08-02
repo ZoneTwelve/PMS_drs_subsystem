@@ -83,7 +83,7 @@ async function scan_nfc_tag( target ){
     const ndef = new NDEFReader();
     // alert("Require permission");
     const nfcPermissionStatus = await navigator.permissions.query({ name: "nfc" });
-    alert( nfcPermissionStatus.state );
+    // alert( nfcPermissionStatus.state );
     // if (nfcPermissionStatus.state === "granted") {
     //   // NFC access was previously granted, so we can start NFC scanning now.
     //   startScanning();

@@ -126,7 +126,7 @@ function applySheetColumns( data ){
     
     // "G"+d.form_id+" - "+d.title  → Original method
     // `G${d.form_id} - ${d.title}` → Javascript ES6
-    // "G$d.form_id - $d.title" → PHP 
+    // "G$d->form_id - $d->title" → PHP 
 
     let head = createElement("div", {className:"row item-head"});
     let idlen = -(data.length > 9 ? 2 : 1);
@@ -155,10 +155,10 @@ function applySheetColumns( data ){
         let trueID = `c-${d.col_id}-opt-true`,
             falseID = `c-${d.col_id}-opt-false`;
         let checkedVar = d.state!=null ? (d.state == 1) : undefined;
-        dataBlock.appendChild(createElement("input", { type:"radio", id: trueID, name:"state[]", className:"db form-check-input radio-opt-red", oninput: formGlobalCheck }));
+        dataBlock.appendChild(createElement("input", { type:"radio", id: trueID, name:`state[${d.col_id}]`, className:"db form-check-input radio-opt-red radio-opt", oninput: formGlobalCheck }));
         dataBlock.appendChild(createElement("label", { innerText:"有狀況", value:"1", htmlFor: trueID, className:"form-check-label lead" }));
         dataBlock.appendChild(createElement("br"));
-        dataBlock.appendChild(createElement("input", { type:"radio", id: falseID, name:"state[]", className:"form-check-input radio-opt-blue", oninput: formGlobalCheck }));
+        dataBlock.appendChild(createElement("input", { type:"radio", id: falseID, name:`state[${d.col_id}]`, className:"form-check-input radio-opt-blue radio-opt", oninput: formGlobalCheck }));
         dataBlock.appendChild(createElement("label", { innerText:"無狀況", value:"0", htmlFor: falseID, className:"form-check-label lead" }));
 
         if( checkedVar != undefined )
@@ -202,18 +202,23 @@ function applySheetColumns( data ){
   
     // submit data
     let form = document.checklist;
-    let names = [ "colid[]", 'newid[]', 'state[]', 'notes[]' ];
+    let names = [ '[name="colid[]"]', '[name="newid[]"]', '.radio-opt', '[name="notes[]"]' ];
+    let fname = [ "colid[]", "newid[]", "state[]", "notes[]"];
     let data = new Object(); // { 'colid[]': [], 'newid[]': [], 'state[]': [], 'notes[]': [] };
     for( let i = 0 ; i < names.length ; i++ ){
-      let n = names[ i ];
-      data[ n ] = [];
+      let n = names[ i ], 
+          fn= fname[ i ];
+      data[ fn ] = [];
       let table = form.querySelectorAll(".info-block");
       for(let el of table){
-        let e = el.querySelector( `[name="${n}"]` );
+        let e = el.querySelector( `${n}` ) || el.querySelector( `[name="state[]"]` );
         console.log( n, e.value, e );
-        data[ n ].push( (e.type != 'radio') ? e.value : (e.checked?'1':'0') );
+        data[ fn ].push( (e.type != 'radio') ? e.value : (e.checked?'1':'0') );
       }
     }
+    console.log("data");
+    console.log( data );
+    // return false;
     // for( let i = 0 ; i < dataElement.length ; i += 4 ){
     //   let column = dataElement[ i ],
     //       status = dataElement[i+1],
@@ -364,9 +369,9 @@ function removeThisItem( el = undefined ){
       let title = block.querySelector('span.title').innerText;
       let colid = block.querySelector('[name="colid[]"]').value;
       Swal.fire({
-        title,
+        title:`確定要刪除此項目嗎`,
         icon: 'warning',
-        html: `確定要刪除此項目嗎`,
+        html: title,
         showCloseButton: true,
         showCancelButton: true,
         focusConfirm: false,
@@ -408,7 +413,7 @@ function applyGroupSelector( json ){
   form.sel_group.appendChild( createElement("option", { innerText:"請選擇一個項目", hidden:true}) );
   for( let obj of json ){
     form.sel_group.appendChild( createElement("option", {
-      innerText: `${obj.dgs_id} - ${obj.name} ${obj.visible==0 ? "(QR Code)" : ""}`,
+      innerText: `${obj.dgs_id} - ${obj.name} ${obj.visible==0 ? "(需掃描)" : ""}`,
       value: obj.dgs_id,
       disabled: obj.visible==0,
     }));
