@@ -16,10 +16,11 @@ router.post("/login", (req, res)=>{
     }
 
     if( r.length > 0 ){
-      req.session.uid = String( r[0]['no'] );
-      req.session.aid = parseInt( r[0]['authority'] );
-      req.session.name = String( r[0]['name'] );
+      req.session.uid   = String( r[0]['no'] );
+      req.session.aid   = parseInt( r[0]['authority'] );
+      req.session.name  = String( r[0]['name'] );
       req.session.uname = String( r[0]['username'] );
+      req.session.db    = "SMS_member";
       req.session.ssrf = (~~(Math.random() * 0xffffffff + 0x10000000)).toString( 16 );
       return res.redirect('/');
     }else{
@@ -53,6 +54,17 @@ router.all("*", (req, res, next)=>{
   }else{
     next();
   }
+});
+
+router.get("/profile", ( req, res ) => {
+  res.database.query("SELECT no, name, username FROM SMS_member WHERE username = ?", [ req.session.uname ],
+  (e, d, f) => {
+    if( e ){
+      return res.status( 500 ).send({e:"failed"});
+    }else{
+      return res.send( (d || [{e:"Fail successfully"}] )[0] );
+    }
+  });
 });
 
 //******************************/

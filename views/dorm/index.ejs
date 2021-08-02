@@ -5,6 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <% include ../template/style %>
+<script src="/src/js/socket.io.js"></script>
 <link rel="stylesheet" href="/src/css/dorm/home.css">
 <script src="/src/js/dorm/home.js"></script>
 <script src="/src/js/sweetalert2.min.js"></script>
@@ -179,10 +180,10 @@
                 </span>
               </p>
             </div>
-            <div id="chat-ctrl" class="col-12 border input-group mb-3 w-100">
-              <input type="text" class="form-control">
-              <button class="btn btn-success">發送</button>
-            </div>
+            <form id="chat-ctrl" class="col-12 border input-group mb-3 w-100" onsubmit="return false;">
+              <input type="text" class="form-control send-msg">
+              <button class="btn btn-success send-btn">發送</button>
+            </form>
           </div>
           <sup>僅會保留 100 則訊息</sup>
         </div>

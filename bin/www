@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-var app = require('../app');
+const app = require('../app');
 app.set('port', 8080);
 app.set('httpsport', 443);
-var ssl = require('../SSL.js');
-var http = require('http');
-var https = require('https');
-var httpServer = http.createServer(app);
-var httpsServer = https.createServer(ssl.options, app);
+const ssl = require('../SSL.js');
+const http = require('http');
+const https = require('https');
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(ssl.options, app);
 httpServer.listen(app.get('port'));
 httpsServer.listen(app.get('httpsport'));
-//var socketServer = require('socket.io')(httpsServer);
-//var socket = require('../websocket.js')(socketServer);
+const socketServer = require('socket.io')(httpsServer);
+const socket = require('../websocket.js')(socketServer);

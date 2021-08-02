@@ -1,4 +1,5 @@
 var page = 0;
+const socket = io( location.origin );
 window.onload = ( ) => {
   downloadSheets( );
   downloadBulletin( );
@@ -84,9 +85,70 @@ function updateBulletinColumns( data ){
 }
 
 function loadChatroom( ){
-  document.querySelector("#chat").classList.remove( "loading" );
   let chatMsg = document.querySelector("#chat-msgs");
-  chatMsg.scrollTop = chatMsg.scrollHeight;
+  socket.on("chat", ( data ) => {
+    console.log( data.name, data.m );
+    let msg = createElement("p");
+    msg.appendChild(createElement("b", { innerText: `${data.name}:`, className:"msg-content text-right" } ));
+    msg.appendChild(createElement("span", { innerText: data.m }));
+    chatMsg.appendChild( msg );
+  });
+  socket.on("response", ( data ) => {
+    switch( data.key ){
+      case 'register':
+        if( data.e ){
+          chatMsg.innerHTML = "<p class='msg-content text-right' style='color:red;'>連線失敗</p>";
+        }else{
+          chatMsg.innerHTML = "<p class='msg-content text-right'>已連上聊天室</p>";
+          initChatPanel( );
+        }
+      break;
+      default:
+        let msg = createElement("p");
+        msg.appendChild(createElement("b", { innerText: `${data.name}:`, className:"msg-content text-right" + (data.name=="You"?" youself":"") } ));
+        msg.appendChild(createElement("span", { innerText: data.m }));
+        chatMsg.appendChild( msg );
+        document.querySelector("#chat-ctrl > input.send-msg").value = "";
+        document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
+    }
+    console.log("response", data);
+  });
+  document.querySelector("#chat").classList.remove( "loading" );
+  // chatMsg.scrollTop = chatMsg.scrollHeight;
+  chatMsg.innerHTML = "";
+  request("/api/v1/chatroom", {
+    method: "GET",
+    headers:{
+      "User-Agent": "Fetch API Agent"
+    }
+  }).then( data => {
+    // loading chat history
+  });
+  request( `/api/v1/profile`, {
+    method: "GET",
+    headers:{
+      "User-Agent": "Fetch API Agent"
+    }
+  }).then( ( data ) => {
+    data['key'] = "register"
+    socket.emit("register", data);
+  });
+}
+
+function initChatPanel( ){
+  let form = document.querySelector("#chat-ctrl");
+  let msg = form.querySelector("input.send-msg"),
+      btn = form.querySelector("button.send-btn")
+  btn.onclick = ( ) => {
+    let m = msg.value;
+    if( m.replace(/\s/g, '') != "" )
+      socket.emit("chat", {msg:m, key:~~(Math.random()*0xffffff).toString(16)});
+  }
+  form.submit = ( ) => {
+    btn.onclick();
+    return false;
+  }
+
 }
 
 function alertBulletin( data ){

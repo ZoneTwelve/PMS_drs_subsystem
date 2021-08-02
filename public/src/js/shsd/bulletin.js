@@ -106,7 +106,6 @@ function editBulletin( data ){
     } )
   }
   form.onsubmit = ( ) => {
-    form.querySelector(".cancel-btn").onclick();
     let bid     = form.bulletin_id.value,
         title   = form.title.value,
         content = form.content.value;
@@ -120,6 +119,7 @@ function editBulletin( data ){
       body: JSON.stringify( final_form ),
     } ).then( () => {
       unsaved = false;
+      form.querySelector(".cancel-btn").onclick();
       downloadBulletin();
     } );
     return false;
