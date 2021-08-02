@@ -40,11 +40,23 @@ module.exports = function(server){
 			});
 		});
 		io.on("chat", ( { msg, key } ) => {
+			if( io.profile == undefined )
+				return io.emit("response", {e:"failed", key});
 			if( typeof(msg) == "string" && msg != "" ){
-				io.emit("response", { name:"You", m: msg, key });
+				let currect_time = NOW( 'time' );
+				io.emit("response", { name:`${io.profile.name}(You)`, m: msg, key });
 				io.to("chat").emit( "chat", {
-					name: io.profile.name, m: msg
+					name: io.profile.name, m: msg, time:currect_time 
 				} );
+				server.database.query("INSERT INTO DRS_chat_record ( msg_id, from_uid, msg_from, msg_to, msg, time ) VALUES ( NULL, ?, ?, 'ALL', ?, ? )", 
+				[io.profile.no, io.profile.name, msg, NOW()], (e, d, f) => {
+					if( e ){
+						console.log( e );
+						// return io.emit("response", {e:"Failed to insert"});
+					}else{
+						return;
+					}
+				});
 			}
 		})
 
@@ -53,4 +65,14 @@ module.exports = function(server){
 		});
 	});
 	console.log("io server is ready")
+}
+
+function NOW( format = "datetime" ){
+	let d = new Date();
+	let formats = {
+		date:`${d.getFullYear()}/${d.getMonth()}/${d.getDate()}`,
+		time:`${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`
+	}
+	formats['datetime'] = `${formats['date']} ${formats['time']}`;
+	return formats[ format ];
 }

@@ -1,4 +1,5 @@
 var page = 0;
+var profile = null;
 const socket = io( location.origin );
 window.onload = ( ) => {
   downloadSheets( );
@@ -99,39 +100,57 @@ function loadChatroom( ){
         if( data.e ){
           chatMsg.innerHTML = "<p class='msg-content text-right' style='color:red;'>連線失敗</p>";
         }else{
-          chatMsg.innerHTML = "<p class='msg-content text-right'>已連上聊天室</p>";
+          chatMsg.innerHTML += "<p class='msg-content text-right'>已連上聊天室</p>";
+          document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
           initChatPanel( );
         }
       break;
       default:
-        let msg = createElement("p");
-        msg.appendChild(createElement("b", { innerText: `${data.name}:`, className:"msg-content text-right" + (data.name=="You"?" youself":"") } ));
-        msg.appendChild(createElement("span", { innerText: data.m }));
-        chatMsg.appendChild( msg );
-        document.querySelector("#chat-ctrl > input.send-msg").value = "";
-        document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
+        if( data.name && data.m ){
+          let msg = createElement("p");
+          msg.appendChild(createElement("b", { innerText: `${data.name}:`, className:"msg-content text-right" + (data.name.indexOf("You")?" youself":"") } ));
+          msg.appendChild(createElement("span", { innerText: data.m }));
+          chatMsg.appendChild( msg );
+          document.querySelector("#chat-ctrl > input.send-msg").value = "";
+          // document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
+          // chatMsg.scrollTop = chatMsg.scrollHeight;
+          // chatMsg.scrollingElement.scrollTop = chatMsg.scrollHeight;
+        }
     }
     console.log("response", data);
   });
   document.querySelector("#chat").classList.remove( "loading" );
   // chatMsg.scrollTop = chatMsg.scrollHeight;
   chatMsg.innerHTML = "";
-  request("/api/v1/chatroom", {
-    method: "GET",
-    headers:{
-      "User-Agent": "Fetch API Agent"
-    }
-  }).then( data => {
-    // loading chat history
-  });
   request( `/api/v1/profile`, {
     method: "GET",
     headers:{
       "User-Agent": "Fetch API Agent"
     }
   }).then( ( data ) => {
+    profile = data;
     data['key'] = "register"
     socket.emit("register", data);
+    request("/api/v1/chat_record", {
+      method: "GET",
+      headers:{
+        "User-Agent": "Fetch API Agent"
+      }
+    }).then( d => {
+      // loading chat history
+      for( let i = d.length-1 ; d.length > 0 ; i-- ){
+        let data = d[i];
+        if( data.from_uid == profile.no ){
+          data.msg_from += "(You)";
+        }
+        console.log( data );
+        let msg = createElement("p");
+        msg.appendChild(createElement("b", { innerText: `${data.msg_from}:`, className:"msg-content text-right" + (data.msg_from.indexOf("You")>-1?" youself":"") } ));
+        msg.appendChild(createElement("span", { innerText: data.msg }));
+        document.querySelector("#chat-msgs").appendChild( msg );
+      }
+      document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
+    });
   });
 }
 

@@ -67,6 +67,17 @@ router.get("/profile", ( req, res ) => {
   });
 });
 
+router.get("/chat_record", ( req, res ) => {
+  res.database.query("SELECT * FROM DRS_chat_record ORDER BY msg_id DESC limit 0, 100;", 
+  (e, d, f) => {
+    if( e ){
+      return res.status( 500 ).send({e:"FAIL to request"});
+    }else{
+      return res.send( d );
+    }
+  });
+});
+
 //******************************/
 //* DRS dorm group RESTful API */
 //******************************/
