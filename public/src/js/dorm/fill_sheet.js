@@ -18,6 +18,7 @@ window.addEventListener("beforeunload", function (e) {
 });
 
 
+
 async function scan_nfc_tag( target ){
   if ("NDEFReader" in window) {
     const ndef = new NDEFReader();

@@ -5,4 +5,4 @@ CREATE TABLE `DRS_sheets` (
   `location` varchar(45) DEFAULT NULL,
   `reporter` varchar(45) DEFAULT NULL,
   PRIMARY KEY (`sheet_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 #COLLATE=utf8mb4_0900_ai_ci

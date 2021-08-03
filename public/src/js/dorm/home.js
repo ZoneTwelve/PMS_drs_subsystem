@@ -7,6 +7,16 @@ window.onload = ( ) => {
   loadChatroom( );
 }
 
+
+window.addEventListener('load', function () {
+  Notification.requestPermission(function (status) {
+    if (Notification.permission !== status) {
+      Notification.permission = status;
+      console.log( status );
+    }
+  });
+});
+
 function downloadSheets(){
   request( `/api/v1/dorm/sheet?page=${parseInt( page ) * 10}`, {
     method: "GET",
@@ -88,11 +98,20 @@ function updateBulletinColumns( data ){
 function loadChatroom( ){
   let chatMsg = document.querySelector("#chat-msgs");
   socket.on("chat", ( data ) => {
-    console.log( data.name, data.m );
+    
     let msg = createElement("p");
     msg.appendChild(createElement("b", { innerText: `${data.name}:`, className:"msg-content text-right" } ));
     msg.appendChild(createElement("span", { innerText: data.m }));
     chatMsg.appendChild( msg );
+    var notification = new Notification(`DRS 收到來自 ${data.name} 的新訊息`, {
+        body: data.m
+        // icon: 'image'
+    });
+    
+    notification.onclick = function() {
+        // text.innerHTML = "msg";
+        notification.close();    
+    };
   });
   socket.on("response", ( data ) => {
     switch( data.key ){
@@ -112,12 +131,14 @@ function loadChatroom( ){
           msg.appendChild(createElement("span", { innerText: data.m }));
           chatMsg.appendChild( msg );
           document.querySelector("#chat-ctrl > input.send-msg").value = "";
+          document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
+
           // document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
           // chatMsg.scrollTop = chatMsg.scrollHeight;
           // chatMsg.scrollingElement.scrollTop = chatMsg.scrollHeight;
         }
     }
-    console.log("response", data);
+    
   });
   document.querySelector("#chat").classList.remove( "loading" );
   // chatMsg.scrollTop = chatMsg.scrollHeight;
@@ -127,10 +148,10 @@ function loadChatroom( ){
     headers:{
       "User-Agent": "Fetch API Agent"
     }
-  }).then( ( data ) => {
-    profile = data;
-    data['key'] = "register"
-    socket.emit("register", data);
+  }).then( ( profile_data ) => {
+    profile = profile_data;
+    profile_data['key'] = "register"
+    socket.emit("register", profile_data);
     request("/api/v1/chat_record", {
       method: "GET",
       headers:{
@@ -138,16 +159,27 @@ function loadChatroom( ){
       }
     }).then( d => {
       // loading chat history
-      for( let i = d.length-1 ; d.length > 0 ; i-- ){
+      console.log( d );
+      if( d.length > 0 )
+      for( let i = (d.length-1) ; i > -1 ; i-- ){
         let data = d[i];
-        if( data.from_uid == profile.no ){
-          data.msg_from += "(You)";
+        try{
+          // console.log( data );
+          if( data.from_uid == profile.no ){
+            data.msg_from += "(You)";
+          }
+
+          
+          let msg = createElement("p");
+          msg.appendChild(createElement("b", { innerText: `${data.msg_from}:`, className:"msg-content text-right" + (data.msg_from.indexOf("You")>-1?" youself":"") } ));
+          msg.appendChild(createElement("span", { innerText: data.msg }));
+          document.querySelector("#chat-msgs").appendChild( msg );
+        }catch(e){
+          
+          console.log( e );
+          
+          return;
         }
-        console.log( data );
-        let msg = createElement("p");
-        msg.appendChild(createElement("b", { innerText: `${data.msg_from}:`, className:"msg-content text-right" + (data.msg_from.indexOf("You")>-1?" youself":"") } ));
-        msg.appendChild(createElement("span", { innerText: data.msg }));
-        document.querySelector("#chat-msgs").appendChild( msg );
       }
       document.querySelector("#chat-msgs").scrollTop = document.querySelector("#chat-msgs").scrollHeight;
     });
@@ -175,9 +207,9 @@ function alertBulletin( data ){
     Swal.fire(
       `<h1 style="text-align:left;"><b>標題</b>:${data.title}</h1>`,
 `<div class="container" style="text-align:left;">
-<p><span class="lead">內文</span>： ${data.content}</p>
-<p><span class="">時間</span>： ${data.time}</p>
-<p><span class="">作者</span>： ${data.poster}</p>
+<p><span class="lead b-post-content">內文</span>： ${data.content}</p>
+<p><span class="b-post-time">時間</span>： ${data.time}</p>
+<p><span class="b-post-author">作者</span>： ${data.poster}</p>
 </div>`
     )
   }else{

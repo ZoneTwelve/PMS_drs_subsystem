@@ -61,7 +61,7 @@ module.exports = function(server){
 		})
 
 		io.on('disconnect', function(data){
-			console.log(`${ io.id } leave`);
+			console.log(`CONN ${ io.id } leave`);
 		});
 	});
 	console.log("io server is ready")

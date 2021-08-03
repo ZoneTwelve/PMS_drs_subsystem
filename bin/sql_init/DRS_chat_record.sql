@@ -6,4 +6,4 @@ CREATE TABLE `DRS_chat_record` (
   `msg` text,
   `time` datetime DEFAULT NULL,
   PRIMARY KEY (`msg_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 #--COLLATE=utf8mb4_0900_ai_ci

@@ -154,3 +154,7 @@ a.sheet-columns:active{
 .youself:last-child{
   margin-bottom: 0px;
 }
+
+.b-post-content{
+  white-space: pre;
+}

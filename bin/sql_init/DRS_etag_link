@@ -1,8 +1,0 @@
-CREATE TABLE `DRS_etag_link` (
-  `tag_id` int NOT NULL AUTO_INCREMENT,
-  `tag_name` varchar(45) DEFAULT NULL,
-  `form_id` int DEFAULT NULL,
-  `tag_hash` varchar(32) DEFAULT NULL,
-  PRIMARY KEY (`tag_id`),
-  UNIQUE KEY `hash_UNIQUE` (`tag_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
