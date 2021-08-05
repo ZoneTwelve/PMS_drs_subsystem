@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% include ../template/style %>
+  <link rel="stylesheet" href="/src/css/shsd/drs_manage.css">
+  <link rel="stylesheet" href="/src/css/shsd/drs_sheets.css">
+  <script src="/src/js/shsd/drs_sheets.js"></script>
+  <title>檢查項目管理 | Admin</title>
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main>
+    <div id="boxie" class="container" style="background: whitesmoke; border-radius: 10px; padding: 50px;">
+      <h1>檢查項目管理界面</h1>
+      <hr>
+      <button class="func_label func_label_show" data-target="new">新增項目</button>
+      <button class="func_label" data-target="modify">修改項目</button>
+      <button class="func_label" data-target="delete">刪除項目</button>
+
+
+      <div id="new-func" class="container func_content func_content_show">
+        <p class="message load">正在載入資料...</p>
+        <form action="/api/v1/shsd/drs_sheet" name="new_group_form" class="form-control req-form" onsubmit="return false;">
+          <input type="hidden" name="_method" value="POST">
+          <label for="new-group-name">組別：</label>
+          <select name="group_select" class="form-select" aria-label="Default select">
+            <option selected>選擇項目的組別</option>
+          </select>
+
+          <div class="form-group">
+            <label for="new-sheet-name">項目名稱：</label>
+            <input name="sheet_name" type="text" class="form-control" id="new-sheet-name" placeholder="組別名稱" autocomplete="off">
+            <small class="form-text text-muted">新增一個組別檢查項目的主項目</small>
+          </div>
+          <div class="form-group">
+            <label for="sheet-def-value">欄位預設值：</label>
+            <input name="sheet_def_value" type="text" class="form-control" placeholder="欄位預設值" autocomplete="off">
+            <small class="form-text text-muted">新增新的檢查項目時，預設填入的資料。</small>
+          </div>
+          <span>資料類別：</span>
+          <div class="form-group pt-1">
+            <input value="0" type="radio" name="datatype" id="dt-boolean-post" autocomplete="off" selected>
+            <label for="dt-boolean-post">二擇(boolean)</label>
+
+            <input value="1" type="radio" name="datatype" id="dt-integer-post" autocomplete="off">
+            <label for="dt-integer-post">數字(Integer)</label>
+
+            <input value="2" type="radio" name="datatype" id="dt-string-post" autocomplete="off">
+            <label for="dt-string-post">文字(String) </label>
+          </div>
+          <br>
+          <input type="submit" class="btn btn-success" value="新增">
+        </form>
+      </div>
+
+
+      <div id="modify-func" class="contaienr func_content">
+        <p class="message load">正在載入資料...</p>
+        <form action="/api/v1/shsd/drs_sheet" name="new_group_form" class="form-control req-form" onsubmit="return false;">
+          <input type="hidden" name="_method" value="PUT">
+          
+          <div class="form-group">
+            <label for="new-group-name">項目：</label>
+            <select name="sheet_select" class="form-select" aria-label="Default select example">
+              <option selected>選擇修改的項目</option>
+            </select>
+            <br>
+
+            <label for="new-group-name">要換到的組別：</label>
+            <select name="group_select" class="form-select" aria-label="Default select">
+              <option selected>選擇項目的組別</option>
+            </select>
+
+            <br>
+            <label for="new-group-name">新的項目名稱：</label>
+            <input name="sheet_name" type="text" class="form-control" id="new-group-name" placeholder="新的項目名稱" autocomplete="off">
+            <small class="form-text text-muted">修改組別項目的名稱</small>
+          </div>
+
+
+          <div class="form-group">
+            <label for="sheet-def-value">欄位預設值：</label>
+            <input name="sheet_def_value" type="text" class="form-control" placeholder="欄位預設值" autocomplete="off">
+            <small class="form-text text-muted">新增新的檢查項目時，預設填入的資料。</small>
+          </div>
+
+
+          <span>資料類別：</span>
+          <div class="form-group pt-1">
+            <input value="0" type="radio" name="datatype" id="dt-boolean-put" autocomplete="off" selected>
+            <label for="dt-boolean-put">二擇(boolean)</label>
+
+            <input value="1" type="radio" name="datatype" id="dt-integer-put" autocomplete="off">
+            <label for="dt-integer-put">數字(Integer)</label>
+
+            <input value="2" type="radio" name="datatype" id="dt-string-put" autocomplete="off">
+            <label for="dt-string-put">文字(String) </label>
+          </div>
+          <br>
+
+          <input type="submit" class="btn btn-primary" value="修改">
+        </form>
+      </div>
+
+
+      <div id="delete-func" class="contaienr func_content">
+        <p class="message load">正在載入資料...</p>
+        <form action="/api/v1/shsd/drs_sheet" name="new_group_form" class="form-control req-form" onsubmit="return false;">
+          <input type="hidden" name="_method" value="DELETE">
+          <div class="form-group">
+            <label for="new-group-name">組別名稱：</label>
+            <select name="sheet_select" class="form-select" aria-label="Default select example">
+              <option selected>選擇刪除的項目</option>
+              <option value="1">One</option>
+              <option value="2">Two</option>
+              <option value="3">Three</option>
+            </select>
+            <small class="form-text text-muted">移除特定檢查組別</small>
+          </div>
+
+          <br>
+          
+          <input type="submit" class="btn btn-danger" value="移除">
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

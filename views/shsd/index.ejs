@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% include ../template/style %>
+  <link rel="stylesheet" href="/src/css/shsd/home.css">
+  <title>Home - SHSD</title>
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main class="container">
+    <h1>預設管理項目</h1>
+    <ul>
+      <li><a href="/shsd/drs_bulletin">管理公告</a></li>
+      <li><a href="/shsd/drs_groups">管理預設組別</a></li>
+      <li><a href="/shsd/drs_sheets">管理預設檢查項目</a></li>
+      <li><a href="/shsd/generate_qrcode">生成 QR Code</a></li>
+      <li><a href="/shsd/set_nfc_tag">建立 NFC Tag</a></li>
+    </ul>
+    <h1>檢查相關</h1>
+    <ul>
+      <li><a href="/dorm">宿舍管理</a></li>
+    </ul>
+  </main>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<% include ../template/style %>
+<script src="/src/js/socket.io.js"></script>
+<link rel="stylesheet" href="/src/css/dorm/home.css">
+<script src="/src/js/dorm/home.js"></script>
+<script src="/src/js/sweetalert2.min.js"></script>
+<link rel="stylesheet" href="/src/css/sweetalert2.min.css">
+<title>Home - DRS Service</title>
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main class="container w-100 h-100 bg-light">
+    <div class="row service">
+      <div class="col-lg-2 col-md-12">
+        <div class="box">
+          <h2>公告</h2>
+        </div>
+        <div id="bulletin" class="container loading"></div>
+      </div>
+
+      <div class="col-lg-7 col-md-12">
+        <div class="row box">
+          <div class="col-10">
+            <h2>日誌</h2>
+          </div>
+          <div class="col-2">
+            <button id="new-sheet-btn" class="btn btn-outline-primary" onclick="alert('資料尚未載入成功');">新增</button>
+          </div>
+        </div>
+        <div id="sheet-list" class="container loading">
+          <ul class="list-group pt-3 lead">
+            <a href="#" class="sheet-columns text-decoration-none">
+              <li class="list-group-item">
+                <span>1024. 某某某 的日誌 </span>
+                <sub>2021/07/31 00:51</sub>
+              </li>
+            </a>
+            <a href="#" class="sheet-columns text-decoration-none">
+              <li class="list-group-item">
+                <span>1023. 某某某 的日誌 </span>
+                <sub>2021/07/29 13:49</sub>
+              </li>
+            </a>
+            <a href="#" class="sheet-columns text-decoration-none">
+              <li class="list-group-item">
+                <span>1022. 某某某 的日誌 </span>
+                <sub>2021/07/24 18:24</sub>
+              </li>
+            </a>
+            <a href="#" class="sheet-columns text-decoration-none">
+              <li class="list-group-item">
+                <span>1021. 某某某 的日誌 </span>
+                <sub>2021/07/17 14:13</sub>
+              </li>
+            </a>
+          </ul>
+          <div class="row list-of-page pt-3">
+            <div class="col-2">﹤</div>
+            <div class="col-2 active">1</div>
+            <div class="col-2">2</div>
+            <div class="col-2">3</div>
+            <div class="col-2">4</div>
+            <div class="col-2">﹥</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-3 col-md-12">
+        <div class="box">
+          <h2>即時通</h2>
+        </div>
+        <div id="chat" class="container loading pt-3">
+          <div class="row">
+            <div id="chat-msgs" class="col-12 border h-100 overflow-auto">
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+              <p class="msg-content text-left">
+                <b>開發者：</b>
+                <span>
+                  Hello sdkfhlaskdjfkl;jashjdlfkhas;dojfhao;sdhf;oashd;fhasd;fij
+                </span>
+              </p>
+              <p class="msg-content text-right youself">
+                <b>You: </b>
+                <span>
+                  Hello
+                </span>
+              </p>
+            </div>
+            <form id="chat-ctrl" class="col-12 border input-group mb-3 w-100" onsubmit="return false;">
+              <input type="text" class="form-control send-msg">
+              <button class="btn btn-success send-btn">發送</button>
+            </form>
+          </div>
+          <sup>僅會保留 100 則訊息</sup>
+        </div>
+      </div>
+    </div>
+  </main>
+  <form name="new_sheet" style="display: hidden;" action="/api/v1/dorm/sheet" method="POST">
+    <input type="hidden" name="token" value="<%= ssrf_token %>">
+  </form>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bulletin - DRS service</title>
+  <% include ../template/style %>
+  <script src="/src/js/shsd/bulletin.js"></script>
+  <link rel="stylesheet" href="/src/js/shsd/bulletin.css">
+</head>
+<body>
+  <% include ../template/navbar %>
+  <main class="container border">
+    <h1>公告 <button id="new_bulletin_btn" class="btn btn-primary" onclick="alert('功能尚未載入，若持續遇到該問題，請回報。');">新增</button> </h1>
+    <div id="bulletin_list" class="loading">
+      <p>World</p>
+    </div>
+    <div id="edit_bulletin" class="hidden-block">
+      <h2>...</h2>
+      <p>
+        <b>最後編輯者:</b>
+        <span class="author"></span>
+      </p>
+      <form action="/api/v1/shsd/bulletin" method="POST" class="form" onsubmit="return false;">
+        <div class="mb-3">
+          <input type="hidden" name="bulletin_id">
+          <input type="text" name="title" class="form-control" placeholder="標題">
+          <textarea name="content" cols="30" rows="10" class="form-control" placeholder="內文"></textarea>
+          <input type="submit" value="修改公告" class="btn btn-success">
+          <input type="button" value="取消" class="btn btn-warning cancel-btn">
+          <input type="button" value="刪除" class="btn btn-danger delete-btn">
+        </div>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

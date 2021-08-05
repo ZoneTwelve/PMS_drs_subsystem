@@ -1,0 +1,25 @@
+<% var message = [ "憑證失效, 請重新登入!", "登入失敗" ] %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% include ./template/style %>
+  <link rel="stylesheet" href="/src/css/login.css">
+  <title>Login | DRS</title>
+</head>
+<body>
+  <div class="container">
+    <h2>Login page</h2>
+    <p><%= message[e] %></p>
+    <form action="/api/v1/login" method="post">
+      <label for="account" class="pt-3 lead">帳號：</label>
+      <input type="text" name="ACC" id="account" value="" class="form-control" autocomplete="off">
+      <label for="password" class="pt-3 lead">密碼：</label>
+      <input type="password" name="PWD" id="" value="" class="form-control" autocomplete="off">
+      <input type="submit" id="password" class="btn btn-primary mt-3" value="登入 Login">
+    </form>
+  </div>
+</body>
+</html>

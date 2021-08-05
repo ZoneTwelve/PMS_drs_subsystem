@@ -1,0 +1,58 @@
+.navbar{
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.bg-design{
+  /* background: #f8f9fa; */
+  background: #f7f7f7;
+}
+
+@keyframes loadingTextAnimation{
+  0%{
+    content: "";
+  }
+  10% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  70% {
+    content: "...";
+  }
+}
+.loading {
+  font-size: 24px;
+}
+.loading:after {
+  -webkit-animation: loadingTextAnimation 2s linear infinite ;
+          animation: loadingTextAnimation 2s linear infinite ;
+  content: "";
+}
+.loading::before{
+  content: "Loading";
+}
+
+@keyframes dotdotdotTextAnimation{
+  0%{
+    content: "";
+  }
+  10% {
+    content: ".";
+  }
+  40% {
+    content: "..";
+  }
+  70% {
+    content: "...";
+  }
+}
+.dotdotdot {
+  font-size: 24px;
+}
+.dotdotdot:after {
+  -webkit-animation: dotdotdotTextAnimation 2s linear infinite ;
+          animation: dotdotdotTextAnimation 2s linear infinite ;
+  content: "";
+}

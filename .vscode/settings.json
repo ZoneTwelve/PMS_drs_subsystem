@@ -1,0 +1,11 @@
+{
+  "sshfs.configs": [
+    {
+      "name": "easonfuck",
+      "host": "easonfuck",
+      "username": "user",
+      "privateKeyPath": "/home/user/.ssh/expkey",
+      "root": "/home/user"
+    }
+  ]
+}

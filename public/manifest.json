@@ -1,0 +1,16 @@
+{
+  "name": "DRS 管理系統",
+  "short_name": "DRS",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#FAFAFA",
+  "description": "A service for periodic inspection",
+  "related_applications": [{
+    "platform": "web"
+  }],
+  "icons": [{
+    "src": "/favicon.ico",
+    "sizes": "512x512",
+    "type": "image/png"
+  }]
+}
