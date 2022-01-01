@@ -1,3 +1,9 @@
+/**
+* Create HTML Element Function
+* @param {HTMLElementTagNameMap | String} tag -HTML Element Tag Name
+* @param {HTMLAnchorElement} obj -Anchor
+* @returns {HTMLElement} A HTML Element
+*/
 const createElement = (tag, obj) => {
   let el = document.createElement(tag);
   if(typeof obj=="object"){
