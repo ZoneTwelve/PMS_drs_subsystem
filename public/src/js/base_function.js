@@ -1,17 +1,17 @@
 /**
  * @typedef {Object} createElementOptionsChildren
- * @property {HTMLElementTagNameMap|String} createElementOptionsChildren.childNodeTag 
+ * @property {keyof HTMLElementTagNameMap} createElementOptionsChildren.childNodeTag 
  * @property {HTMLAnchorElement} createElementOptionsChildren.anchor
  * @property {createElementOptions=} createElementOptionsChildren.options
  */
 /**
  * @typedef {Object} createElementOptions
  * @property {Array<createElementOptionsChildren>} createElementOptions.objChildren
- * @property {Array<{eventName:String,linster:Function}>} createElementOptions.eventEmitters
+ * @property {Array<{eventName:keyof HTMLElementEventMap,linster:Function}>} createElementOptions.eventEmitters
  */
 /**
  * 建立HTML DOM包裝函式
- * @param {HTMLElementTagNameMap | String} tag -HTML Element Tag Name
+ * @param {keyof HTMLElementTagNameMap} tag -HTML Element Tag Name
  * @param {HTMLAnchorElement} obj -Anchor
  * @param {createElementOptions} Option -Nested Child HTML Element Node
  * @returns {HTMLElement} A HTML Element
